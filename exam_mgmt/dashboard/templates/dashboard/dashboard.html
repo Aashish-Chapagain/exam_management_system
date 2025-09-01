@@ -1,0 +1,59 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Exam Management</title>
+  <link rel="stylesheet" href="{% static 'dashboard/css/style.css' %}">
+</head>
+<body>
+  
+  <header class="navbar">
+    <h1>📚 Exam Management System</h1>
+    <nav>
+      <a href="#">Profile</a>
+      <a href="#">Settings</a>
+      <a href="{% url 'admin_login' %}">Logout</a>
+    </nav>
+  </header>
+
+  <main class="dashboard">
+    <div class="card">
+      <h2>🗂 Exam Scheduling</h2>
+      <p>Create, edit, and manage exam schedules.</p>
+      <a href="{% url 'exam_schedule' %}">schedule Exams</a>
+    </div>
+
+    <div class="card">
+      <h2>📑 Question Bank</h2>
+      <p>Store, organize, and manage question papers.</p>
+      <a href="#">Go to Question Bank</a>
+    </div>
+
+    <div class="card">
+      <h2>🎟 Admit Cards</h2>
+      <p>Generate and distribute student admit cards.</p>
+      <a href="#">Generate Cards</a>
+    </div>
+
+    <div class="card">
+      <h2>📊 Results & Reports</h2>
+      <p>Publish results and generate reports automatically.</p>
+      <a href="#">View Results</a>
+    </div>
+
+    <div class="card">
+      <h2>🪑 Seat Planning</h2>
+      <p>Allocate seats efficiently and reduce manual errors.</p>
+      <a href="#">Seat Planner</a>
+    </div>
+
+    <div class="card">
+      <h2>⚙️ Admin Tools</h2>
+      <p>Manage users, update settings, and monitor system activity.</p>
+      <a href="#">Admin Tools</a>
+    </div>
+  </main>
+</body>
+</html>

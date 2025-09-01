@@ -1,0 +1,198 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>School Exam Scheduler</title>
+  
+  <link rel="stylesheet"  href="{% static 'exam_schedule/css/style.css' %}" />
+  <script src = "{% static 'exam_schedule/js/script.js' %}" ></script>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>📚 Exam Scheduler — Classes 1–10</h1>
+        <div class="help">Plan exams across classes with built-in clash checks (class, hall, invigilator) and a minimum gap rule.</div>
+      </div>
+      <div class="actions">
+        <button id="btnValidate" class="btn">Validate</button>
+        <button id="btnPrint" class="btn ghost">Print <span class="kbd">Ctrl+P</span></button>
+      </div>
+    </header>
+
+    
+    <section class="card">
+      <div class="grid g-3">
+        <div>
+          <label for="term">Term / Session</label>
+          <input id="term" placeholder="e.g., 2082 (BS) / 2025" />
+        </div>
+        <div>
+          <label for="windowStart">Window Start</label>
+          <input id="windowStart" type="date" />
+        </div>
+        <div>
+          <label for="windowEnd">Window End</label>
+          <input id="windowEnd" type="date" />
+        </div>
+      </div>
+      <div class="grid g-3" style="margin-top:12px">
+        <div>
+          <label for="minGap">Minimum gap between a class's papers (days)</label>
+          <input id="minGap" type="number" min="0" value="1" />
+        </div>
+        <div>
+          <label for="defaultDuration">Default duration (minutes)</label>
+          <input id="defaultDuration" type="number" min="30" step="5" value="90" />
+        </div>
+        <div>
+          <label for="schoolName">School (optional)</label>
+          <input id="schoolName" placeholder="e.g., Butwal Kalika" />
+        </div>
+      </div>
+    </section>
+
+    
+    <section class="card">
+      <h2>➕ Add / Edit Exam</h2>
+      <form id="examForm" onsubmit="return false;">
+        <input type="hidden" id="editingId" />
+        <div class="grid g-4">
+          <div>
+            <label for="klass">Class</label>
+            <select id="klass" required>
+              <option value="">Select…</option>
+              <option>1</option><option>2</option><option>3</option><option>4</option>
+              <option>5</option><option>6</option><option>7</option><option>8</option>
+              <option>9</option><option>10</option>
+            </select>
+          </div>
+          <div>
+            <label for="section">Section</label>
+            <select id="section">
+              <option value="">—</option>
+              <option>A</option><option>B</option><option>C</option><option>D</option>
+            </select>
+          </div>
+          <div>
+            <label for="subject">Subject</label>
+            <input id="subject" list="subjectsList" placeholder="e.g., Mathematics" required />
+            <datalist id="subjectsList">
+              <option>English</option><option>Nepali</option><option>Mathematics</option>
+              <option>Science</option><option>Social Studies</option><option>Computer</option>
+              <option>Health/PE</option><option>Moral Education</option><option>Optional Math (9–10)</option>
+            </datalist>
+          </div>
+          <div>
+            <label for="paper">Paper / Code</label>
+            <input id="paper" placeholder="e.g., ENG-101" />
+          </div>
+        </div>
+        <div class="grid g-4" style="margin-top:12px">
+          <div>
+            <label for="date">Date</label>
+            <input id="date" type="date" required />
+          </div>
+          <div>
+            <label for="start">Start Time</label>
+            <input id="start" type="time" required />
+          </div>
+          <div>
+            <label for="duration">Duration (minutes)</label>
+            <input id="duration" type="number" min="30" step="5" />
+          </div>
+          <div>
+            <label for="hall">Hall / Room</label>
+            <input id="hall" placeholder="e.g., Hall A or 302" />
+          </div>
+        </div>
+        <div class="grid g-3" style="margin-top:12px">
+          <div>
+            <label for="candidates">Expected Candidates</label>
+            <input id="candidates" type="number" min="0" placeholder="e.g., 60" />
+          </div>
+          <div>
+            <label for="invigilators">Invigilator(s)</label>
+            <input id="invigilators" placeholder="Comma-separated names" />
+          </div>
+          <div>
+            <label for="notes">Notes</label>
+            <input id="notes" placeholder="Any special instructions" />
+          </div>
+        </div>
+        <div class="toolbar" style="margin-top:12px">
+          <div class="left stack">
+            <button id="btnAdd" class="btn primary" type="button">Save Exam</button>
+            <button id="btnReset" class="btn" type="reset">Clear</button>
+          </div>
+          <div class="right stack">
+            <button id="btnExportJSON" class="btn ok" type="button">Export JSON</button>
+            <button id="btnExportCSV" class="btn" type="button">Export CSV</button>
+            <button id="btnClearAll" class="btn bad" type="button">Clear All</button>
+          </div>
+        </div>
+        <p class="help" style="margin-top:8px">Tip: leave <span class="kbd">Section</span> blank to schedule for the whole class (all sections).</p>
+      </form>
+    </section>
+
+   
+    <section class="card">
+      <div class="toolbar">
+        <div class="left">
+          <h2>📋 Schedule</h2>
+        </div>
+        <div class="right">
+          <label class="pill">Filter Class
+            <select id="filterClass" style="background:transparent;border:none;color:var(--ink);">
+              <option value="">All</option>
+              <option>1</option><option>2</option><option>3</option><option>4</option>
+              <option>5</option><option>6</option><option>7</option><option>8</option>
+              <option>9</option><option>10</option>
+            </select>
+          </label>
+          <label class="pill">Section
+            <select id="filterSection" style="background:transparent;border:none;color:var(--ink);">
+              <option value="">All</option>
+              <option>A</option><option>B</option><option>C</option><option>D</option>
+            </select>
+          </label>
+          <button id="btnSort" class="btn">Sort by Date/Time</button>
+        </div>
+      </div>
+
+      <div class="notice" id="validationSummary" style="display:none;margin-top:8px"></div>
+
+      <div style="max-height:420px;overflow:auto;margin-top:8px">
+        <table id="table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Start</th>
+              <th>End</th>
+              <th>Class</th>
+              <th>Section</th>
+              <th>Subject</th>
+              <th>Paper</th>
+              <th>Hall</th>
+              <th>Invigilators</th>
+              <th>Duration</th>
+              <th>Candidates</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <p class="help">Data is saved to your browser (localStorage). You can export JSON/CSV and import server-side via Django.</p>
+
+    <div class="footer">© Exam Management — Scheduler</div>
+  </div>
+
+
+  <script src="script.js"></script>
+</body>
+</html>

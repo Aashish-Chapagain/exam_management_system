@@ -1,0 +1,78 @@
+# -----------------
+# Python
+# -----------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+*.manifest
+*.spec
+
+# -----------------
+# Virtual environments
+# -----------------
+venv/
+env/
+ENV/
+.venv/
+.Python
+
+# -----------------
+# Django
+# -----------------
+*.log
+*.pot
+*.pyc
+db.sqlite3
+media/
+staticfiles/
+local_settings.py
+
+# -----------------
+# Environment & secrets
+# -----------------
+.env
+*.env
+.env.*
+secrets.json
+
+# -----------------
+# Migrations cache (keep if you want history, else ignore)
+*/migrations/__pycache__/
+*/migrations/*.pyc
+# Uncomment if you don’t want migrations tracked at all:
+# */migrations/
+
+# -----------------
+# Editors / IDEs
+# -----------------
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# -----------------
+# OS specific
+# -----------------
+.DS_Store
+Thumbs.db
+
+# -----------------
+# Testing & coverage
+# -----------------
+.coverage
+htmlcov/
+.tox/
+.nox/
+.pytest_cache/
+coverage.xml
+
+# -----------------
+# Other temp files
+# -----------------
+*.bak
+*.swp
+*.tmp
