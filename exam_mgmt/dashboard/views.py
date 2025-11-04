@@ -14,8 +14,7 @@ from django.contrib.auth import logout
 #     return redirect('admin_login')
 
 
-@login_required
+
 
 def dashboard_home(request):
-    logout(request)
-    return render(request, 'dashboard/dashboard.html')
+      return render(request, 'dashboard/dashboard.html')

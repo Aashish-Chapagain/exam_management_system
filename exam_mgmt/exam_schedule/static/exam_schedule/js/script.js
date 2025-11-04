@@ -497,5 +497,43 @@ $("#date").addEventListener("change", () => {
   }
 });
 
-// Initial render
-render();
+// If server provided initial exams, merge/load them when appropriate
+document.addEventListener('DOMContentLoaded', () => {
+  try {
+    // Prefer server data embedded via json_script element
+    let server = [];
+    const el = document.getElementById('init-exams');
+    if (el) {
+      try {
+        server = JSON.parse(el.textContent || el.innerText || '[]');
+      } catch (e) {
+        server = [];
+      }
+    } else {
+      // fallback for older embedding
+      server = window.INIT_EXAMS || [];
+    }
+
+    const stored = Store.load() || [];
+    if (Array.isArray(server) && server.length) {
+      if (!stored || stored.length === 0) {
+        // No local data: seed from server
+        Schedule.rows = server.map((r) => ({ ...r }));
+        Store.save(Schedule.rows);
+      } else {
+        // Merge server rows that aren't present locally (by id)
+        const ids = new Set(stored.map((s) => String(s.id)));
+        const toAdd = server.filter((r) => !ids.has(String(r.id)));
+        if (toAdd.length) {
+          Schedule.rows = [...stored, ...toAdd.map((r) => ({ ...r }))];
+          Store.save(Schedule.rows);
+        }
+      }
+    }
+  } catch (e) {
+    // ignore
+    console.error('INIT_EXAMS load error', e);
+  }
+  // render after possible merge
+  render();
+});

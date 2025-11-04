@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Question Paper</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'question_bank/css/style.css' %}">
+</head>
+<body>
+    <div class="form-container">
+        <h2>Upload Question Paper</h2>
+
+        <form id="uploadForm" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Upload</button>
+        </form>
+
+        <div id="previewBox" class="preview">
+            <h3>Uploaded Files</h3>
+            <ul>
+                {% for q in questions %}
+                <li>
+                    <strong>{{ q.semester }}</strong> - {{ q.subject_name }} :
+                    <a href="{{ q.question_file.url }}" target="_blank">View File</a>
+                </li>
+                {% empty %}
+                <li>No files uploaded yet.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <script src="{% static 'question_bank/js/script.js' %}"></script>
+</body>
+</html>
