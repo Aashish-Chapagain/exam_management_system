@@ -1,7 +1,7 @@
 from django import forms
-from .models import ExamChecklist  # or whatever your model is
+from .models import Exam
 
-class ExamCheckListForm(forms.ModelForm):
+class ExamForm(forms.ModelForm):
     class Meta:
-        model = ExamChecklist
-        fields = ['term', 'start_date', 'end_date', 'academic_calendar_ok', 'academic_calendar_notes']
+        model = Exam
+        fields = '__all__'

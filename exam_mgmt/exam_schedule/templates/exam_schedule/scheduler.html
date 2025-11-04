@@ -1,20 +1,24 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>School Exam Scheduler</title>
-  
-  <link rel="stylesheet"  href="{% static 'exam_schedule/css/style.css' %}" />
-  <script src = "{% static 'exam_schedule/js/script.js' %}" ></script>
+
+  <link rel="stylesheet" href="{% static 'exam_schedule/css/style.css' %}" />
 </head>
+
 <body>
+
+
   <div class="wrap">
     <header>
       <div>
-        <h1>📚 Exam Scheduler — Classes 1–10</h1>
-        <div class="help">Plan exams across classes with built-in clash checks (class, hall, invigilator) and a minimum gap rule.</div>
+        <h1>📚 Exam Scheduler for</h1>
+        <div class="help">Plan exams across classes with built-in clash checks (class, hall, invigilator) and a minimum
+          gap rule.</div>
       </div>
       <div class="actions">
         <button id="btnValidate" class="btn">Validate</button>
@@ -22,7 +26,7 @@
       </div>
     </header>
 
-    
+
     <section class="card">
       <div class="grid g-3">
         <div>
@@ -54,36 +58,44 @@
       </div>
     </section>
 
-    
+
     <section class="card">
-      <h2>➕ Add / Edit Exam</h2>
-      <form id="examForm" onsubmit="return false;">
+      <h2>➕ Exam</h2>
+      <form id="examForm" method="POST" onsubmit="return false;">
+        {% csrf_token %}
+
         <input type="hidden" id="editingId" />
         <div class="grid g-4">
           <div>
-            <label for="klass">Class</label>
+            <label for="klass">Course</label>
             <select id="klass" required>
-              <option value="">Select…</option>
-              <option>1</option><option>2</option><option>3</option><option>4</option>
-              <option>5</option><option>6</option><option>7</option><option>8</option>
-              <option>9</option><option>10</option>
+              <option value="" disabled selected>Select class</option>
+               <option>BCA</option>
             </select>
           </div>
           <div>
-            <label for="section">Section</label>
-            <select id="section">
-              <option value="">—</option>
-              <option>A</option><option>B</option><option>C</option><option>D</option>
+            <label for="semester">Semester</label>
+            <select id="semester">
+              <option value = "1">1st semester</option>
+              <option value = "2">2nd semester</option>
+              <option value = "3">3rd semester</option>
+              <option value = "4">4rd semester</option>
+              <option value = "5">5th semester</option>
+              <option value = "6">6th semester</option>
+              <option value = "7">7th semester</option>
+              <option value = "8">8th semester</option>
             </select>
           </div>
           <div>
             <label for="subject">Subject</label>
-            <input id="subject" list="subjectsList" placeholder="e.g., Mathematics" required />
-            <datalist id="subjectsList">
-              <option>English</option><option>Nepali</option><option>Mathematics</option>
-              <option>Science</option><option>Social Studies</option><option>Computer</option>
-              <option>Health/PE</option><option>Moral Education</option><option>Optional Math (9–10)</option>
-            </datalist>
+            <select id = "subject" required >
+                    
+              <!-- Options will be populated by JavaScript -->
+            
+
+                <option value="" disabled selected>select subject</option>
+              </select>
+    
           </div>
           <div>
             <label for="paper">Paper / Code</label>
@@ -133,11 +145,12 @@
             <button id="btnClearAll" class="btn bad" type="button">Clear All</button>
           </div>
         </div>
-        <p class="help" style="margin-top:8px">Tip: leave <span class="kbd">Section</span> blank to schedule for the whole class (all sections).</p>
+        <p class="help" style="margin-top:8px">Tip: leave <span class="kbd">Section</span> blank to schedule for the
+          whole class (all sections).</p>
       </form>
     </section>
 
-   
+
     <section class="card">
       <div class="toolbar">
         <div class="left">
@@ -147,15 +160,20 @@
           <label class="pill">Filter Class
             <select id="filterClass" style="background:transparent;border:none;color:var(--ink);">
               <option value="">All</option>
-              <option>1</option><option>2</option><option>3</option><option>4</option>
-              <option>5</option><option>6</option><option>7</option><option>8</option>
-              <option>9</option><option>10</option>
+              <option>BCA</option>
+              <option>BBS</option>
+              <option>B.ED</option>
+              <option>BBA</option>
+
             </select>
           </label>
           <label class="pill">Section
             <select id="filterSection" style="background:transparent;border:none;color:var(--ink);">
               <option value="">All</option>
-              <option>A</option><option>B</option><option>C</option><option>D</option>
+              <option>A</option>
+              <option>B</option>
+              <option>C</option>
+              <option>D</option>
             </select>
           </label>
           <button id="btnSort" class="btn">Sort by Date/Time</button>
@@ -187,12 +205,13 @@
       </div>
     </section>
 
-    <p class="help">Data is saved to your browser (localStorage). You can export JSON/CSV and import server-side via Django.</p>
 
     <div class="footer">© Exam Management — Scheduler</div>
   </div>
 
 
-  <script src="script.js"></script>
+  <script src="{% static 'exam_schedule/js/script.js' %}?v=1 "></script>
+
 </body>
+
 </html>

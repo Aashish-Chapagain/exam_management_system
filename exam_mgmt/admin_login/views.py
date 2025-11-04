@@ -13,6 +13,7 @@ def adminlogin(request):
             return redirect('dashboard_home')
         else :
             messages.error(request, "Invalid credentials")
+            return render(request, 'admin_login/adminlogin.html')
     return render(request, 'admin_login/adminlogin.html')
 
 # def adminlogin(request):
