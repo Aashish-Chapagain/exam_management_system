@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'dashboard',
     'exam_schedule',
     'question_bank',
+    'seatplan',
 ]
 
 MIDDLEWARE = [

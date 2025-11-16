@@ -1,0 +1,36 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Select Exam & Hall</title>
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+</head>
+
+<body>
+<div class="navbar">Select Exam & Hall</div>
+
+<div class="container">
+    <form method="POST" onsubmit="return confirmSeatGeneration()">
+        {% csrf_token %}
+
+        <label><b>Select Exam:</b></label><br>
+        <select name="exam_id">
+            {% for exam in exams %}
+                <option value="{{ exam.id }}">{{ exam.subject }} — ({{ exam.semester }})</option>
+            {% endfor %}
+        </select>
+        <br><br>
+
+        <label><b>Select Hall:</b></label><br>
+        <select name="hall_id">
+            {% for hall in halls %}
+                <option value="{{ hall.id }}">{{ hall.name }} ({{ hall.rows }}×{{ hall.columns }})</option>
+            {% endfor %}
+        </select>
+        <br><br>
+
+        <button class="btn">Generate Seat Plan</button>
+    </form>
+</div>
+</body>
+</html>
