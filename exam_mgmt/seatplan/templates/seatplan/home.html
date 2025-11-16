@@ -4,7 +4,7 @@
 <html>
 <head>
     <title>Seat Plan Dashboard</title>
-    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'seatplan/css/main.css' %}">
 </head>
 
 <body>
@@ -13,24 +13,28 @@
     <div class="container">
         <div class="card-grid">
 
+            <!-- Create Hall -->
             <div class="card">
                 <h3>Create Hall</h3>
-                <a href="/hall/create/">Add Hall</a>
+                 <a href="#">Add Hall</a>
             </div>
 
+            <!-- Create Exam -->
             <div class="card">
                 <h3>Create Exam</h3>
-                <a href="/exam/create/">Add Exam</a>
+                 <a href="#">Add Exam</a>
             </div>
 
+            <!-- Generate Seat Plan -->
             <div class="card">
                 <h3>Generate Seat Plan</h3>
-                <a href="/seatplan/select/">Generate</a>
+                 <a href="{% url 'seatplan_select' %}">Generate</a>
             </div>
 
+            <!-- View Seat Plans -->
             <div class="card">
                 <h3>View Seat Plans</h3>
-                <a href="/seatplan/list/">View Plans</a>
+                 <a href="#">View Plans</a>
             </div>
 
         </div>

@@ -3,7 +3,11 @@
 <html>
 <head>
     <title>Select Exam & Hall</title>
-    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'seatplan/css/main.css' %}">
+    <script>
+        console.log('DEBUG: select page css ->', "{% static 'seatplan/css/main.css' %}");
+        fetch("{% static 'seatplan/css/main.css' %}").then(r=>console.log('fetch select css', r.status)).catch(e=>console.error(e));
+    </script>
 </head>
 
 <body>
@@ -24,7 +28,7 @@
         <label><b>Select Hall:</b></label><br>
         <select name="hall_id">
             {% for hall in halls %}
-                <option value="{{ hall.id }}">{{ hall.name }} ({{ hall.rows }}×{{ hall.columns }})</option>
+                <option value="{{ hall.id }}">{{ hall.name }} ({{ hall.rows }}×{{ hall.cols }})</option>
             {% endfor %}
         </select>
         <br><br>

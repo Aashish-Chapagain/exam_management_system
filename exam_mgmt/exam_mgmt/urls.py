@@ -26,6 +26,7 @@ urlpatterns = [
     path('dashboard/', include('dashboard.urls')),
     path('scheduler/', include('exam_schedule.urls')),
     path('question_bank/', include('question_bank.urls')),
+    path('seatplan/', include('seatplan.urls')),
 ]
 
 if settings.DEBUG:
