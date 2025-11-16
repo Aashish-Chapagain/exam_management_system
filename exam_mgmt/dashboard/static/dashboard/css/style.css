@@ -7,7 +7,7 @@
 }
 
 /* Navbar */
-.navbar {
+.navbar  {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -91,3 +91,4 @@
 .navbar nav a.active {
   border-bottom: 2px solid #ffd700;
 }
+
