@@ -17,7 +17,7 @@
             <!-- Create Hall -->
             <div class="card">
                 <h3>Create Hall</h3>
-                 <a href="#">Add Hall</a>
+                 <a href="{% url 'seatplan_create_hall' %}">Add Hall</a>
             </div>
 
             <!-- Create Exam -->
@@ -32,10 +32,10 @@
                  <a href="{% url 'seatplan_select' %}">Generate</a>
             </div>
 
-            <!-- View Seat Plans -->
+         
             <div class="card">
                 <h3>View Seat Plans</h3>
-                 <a href="#">View Plans</a>
+                 <a href="{% url 'seatplan_select' %}">View Plans</a>
             </div>
 
         </div>

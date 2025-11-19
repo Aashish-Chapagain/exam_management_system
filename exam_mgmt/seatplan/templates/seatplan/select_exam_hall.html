@@ -32,6 +32,17 @@
 
         <button class="btn">Generate Seat Plan</button>
     </form>
+    
+    <div id="hall-action" style="margin-top:12px;">
+        <!-- JS will populate a create link here when needed -->
+    </div>
+
+    {# JSON data for client-side logic #}
+    {{ exams_json|json_script:"exams-data" }}
+    {{ halls_json|json_script:"halls-data" }}
+    {% if selected_hall_id %}
+        <input type="hidden" id="selected-hall-id" value="{{ selected_hall_id }}">
+    {% endif %}
 </div>
 </body>
 </html>
