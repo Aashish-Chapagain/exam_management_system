@@ -4,10 +4,7 @@
 <head>
     <title>Select Exam & Hall</title>
     <link rel="stylesheet" href="{% static 'seatplan/css/main.css' %}">
-    <script>
-        console.log('DEBUG: select page css ->', "{% static 'seatplan/css/main.css' %}");
-        fetch("{% static 'seatplan/css/main.css' %}").then(r=>console.log('fetch select css', r.status)).catch(e=>console.error(e));
-    </script>
+    <script src="{% static 'seatplan/js/main.js' %}"></script>
 </head>
 
 <body>

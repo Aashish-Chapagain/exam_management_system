@@ -5,17 +5,6 @@
     <title>Seat Plan</title>
     <link rel="stylesheet" href="{% static 'seatplan/css/main.css' %}">
     <script src="{% static 'seatplan/js/main.js' %}"></script>
-        <script>
-                // Debug: log resolved static URLs for troubleshooting
-                console.log('DEBUG: seatplan css url ->', "{% static 'seatplan/css/main.css' %}");
-                console.log('DEBUG: seatplan js url ->', "{% static 'seatplan/js/main.js' %}");
-                // try fetching the CSS to show status in console
-                (function(){
-                    fetch("{% static 'seatplan/css/main.css' %}")
-                        .then(r=>console.log('fetch CSS status', r.status))
-                        .catch(e=>console.error('fetch CSS error', e));
-                })();
-        </script>
 </head>
 
 <body>
