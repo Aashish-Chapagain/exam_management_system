@@ -27,6 +27,7 @@ urlpatterns = [
     path('scheduler/', include('exam_schedule.urls')),
     path('question_bank/', include('question_bank.urls')),
     path('seatplan/', include('seatplan.urls')),
+    path('admit/', include('admit_stds.urls')),
 ]
 
 if settings.DEBUG:

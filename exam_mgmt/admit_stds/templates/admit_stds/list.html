@@ -1,0 +1,27 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admitted Students</title>
+    <link rel="stylesheet" href="{% static 'seatplan/css/main.css' %}">
+</head>
+<body>
+<div class="navbar">Admitted Students</div>
+<div class="container">
+    <a class="btn" href="{% url 'admit_create' %}">Add Admitted Student</a>
+    <table>
+        <tr><th>Roll</th><th>Name</th><th>Exam</th><th>Admitted At</th></tr>
+        {% for s in students %}
+        <tr>
+            <td>{{ s.roll_no }}</td>
+            <td>{{ s.name }}</td>
+            <td>{{ s.exam }}</td>
+            <td>{{ s.admitted_at }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4">No admitted students</td></tr>
+        {% endfor %}
+    </table>
+</div>
+</body>
+</html>

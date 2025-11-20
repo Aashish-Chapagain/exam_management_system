@@ -1,0 +1,19 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Admitted Student</title>
+    <link rel="stylesheet" href="{% static 'seatplan/css/main.css' %}">
+</head>
+<body>
+<div class="navbar">Create Admitted Student</div>
+<div class="container">
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button class="btn" type="submit">Create</button>
+        <a class="btn" href="{% url 'admit_list' %}">Cancel</a>
+    </form>
+</div>
+</body>
+</html>
