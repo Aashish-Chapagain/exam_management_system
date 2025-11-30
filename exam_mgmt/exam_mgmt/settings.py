@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'question_bank',
     'seatplan',
     'admit_stds',
+    'std_account',
 ]
 
 MIDDLEWARE = [

@@ -4,7 +4,6 @@
 <head>
     <title>Select Exam & Hall</title>
     <link rel="stylesheet" href="{% static 'seatplan/css/main.css' %}">
-    <script src="{% static 'seatplan/js/main.js' %}"></script>
 </head>
 
 <body>
@@ -44,5 +43,7 @@
         <input type="hidden" id="selected-hall-id" value="{{ selected_hall_id }}">
     {% endif %}
 </div>
+
+<script src="{% static 'seatplan/js/main.js' %}"></script>
 </body>
 </html>

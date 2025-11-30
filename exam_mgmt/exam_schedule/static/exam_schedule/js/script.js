@@ -348,7 +348,8 @@ function fillForm(r) {
 }
 
 // Add/Update
-$("#btnAdd").addEventListener("click", () => {
+$("#btnAdd").addEventListener("click", (e) => {
+  e.preventDefault();
   const r = readForm();
   if (!r.klass || !r.subject || !r.date || !r.start) {
     alert("Please fill Class, Subject, Date and Start Time.");
@@ -360,9 +361,45 @@ $("#btnAdd").addEventListener("click", () => {
   } else {
     Schedule.add(r);
   }
-  $("#examForm").reset();
-  $("#editingId").value = "";
-  $("#btnAdd").textContent = "Save Exam";
+  
+  // Post to Django backend to save to database
+  const form = $("#examForm");
+  const formData = new FormData(form);
+  
+  // Map client field names to Django model field names
+  formData.set('term', $("#term").value);
+  formData.set('course', $("#klass").value);
+  formData.set('semester', $("#semester").value);
+  formData.set('subject', $("#subject").value);
+  formData.set('paper_code', $("#paper").value);
+  formData.set('date', $("#date").value);
+  formData.set('start_time', $("#start").value);
+  formData.set('duration', $("#duration").value || $("#defaultDuration").value || "90");
+  formData.set('hall', $("#hall").value);
+  formData.set('candidates', $("#candidates").value || "0");
+  formData.set('invigilators', $("#invigilators").value);
+  formData.set('notes', $("#notes").value);
+  
+  fetch(window.location.pathname, {
+    method: 'POST',
+    body: formData
+  })
+  .then(r => {
+    if (r.ok) {
+      console.log('Exam saved to database');
+      $("#examForm").reset();
+      $("#editingId").value = "";
+      $("#btnAdd").textContent = "Save Exam";
+      // Reload to show saved data from server
+      setTimeout(() => location.reload(), 500);
+    } else {
+      alert('Failed to save to database');
+    }
+  })
+  .catch(e => {
+    console.error('Server save error:', e);
+    alert('Error: ' + e.message);
+  });
 });
 
 // Reset
