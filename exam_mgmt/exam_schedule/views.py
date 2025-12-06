@@ -14,7 +14,7 @@ def scheduler(request):
 
     exams_qs = Exam.objects.all().order_by('date', 'start_time')
 
-    # Convert queryset to list of dicts with keys expected by the client JS
+    
     exams_list = []
     for e in exams_qs:
         exams_list.append({
