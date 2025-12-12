@@ -147,8 +147,15 @@
         </div>
         <p class="help" style="margin-top:8px">Tip: leave <span class="kbd">Section</span> blank to schedule for the
           whole class (all sections).</p>
+             
       </form>
     </section>
+    <section class = "card">
+
+  <button id = "autofilldata" class="btn ok">Automatic Scheduling</button>
+</section>
+
+ 
 
 
     <section class="card">
@@ -184,6 +191,7 @@
         </div>
       </div>
 
+
       <div class="notice" id="validationSummary" style="display:none;margin-top:8px"></div>
 
       <div style="max-height:420px;overflow:auto;margin-top:8px">
@@ -216,7 +224,7 @@
 
   {# Embed initial exams safely using Django's json_script filter #}
   {{ exams_list|json_script:"init-exams" }}
-  <script src="{% static 'exam_schedule/js/script.js' %}?v=1"></script>
+  <script src="{% static 'exam_schedule/js/script.js' %}"></script>
 
 </body>
 

@@ -3,8 +3,10 @@ from django.contrib.auth.decorators import login_required
 from .forms import ExamForm
 from .models import Exam
 import json
+from .teachers_and_subjects import teachers, subjects
 
-@login_required(login_url='admin_login')
+
+@login_required
 def scheduler(request):
     if request.method == 'POST':
         form = ExamForm(request.POST)
