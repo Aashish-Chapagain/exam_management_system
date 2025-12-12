@@ -14,7 +14,7 @@ def adminlogin(request):
         else :
             messages.error(request, "Invalid credentials")
             return render(request, 'admin_login/adminlogin.html')
+        
+# handles GET and the failed login attempts
     return render(request, 'admin_login/adminlogin.html')
 
-# def adminlogin(request):
-#     return render(request, 'admin_login/adminlogin.html')

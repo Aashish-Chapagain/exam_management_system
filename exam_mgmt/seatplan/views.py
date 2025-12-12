@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from django.contrib.auth.decorators import login_required
 from django import forms
 from .models import Hall, Student, SeatPlan
 from exam_schedule.models import Exam
@@ -11,10 +12,12 @@ class HallForm(forms.ModelForm):
         fields = ['name', 'rows', 'cols']
 
 
+@login_required(login_url='admin_login')
 def home(request):
     return render(request, 'seatplan/home.html')
 
 
+@login_required(login_url='admin_login')
 def select_exam_hall(request):
     if request.method == 'POST':
         exam_id = request.POST.get('exam_id')
@@ -70,6 +73,7 @@ def create_hall(request):
 
     return render(request, 'seatplan/create_hall.html', {'form': form})
 
+@login_required(login_url='admin_login')
 def generate_seatplan(request, exam_id, hall_id):
     exam = Exam.objects.get(id=exam_id)
     hall = Hall.objects.get(id=hall_id)
@@ -94,7 +98,7 @@ def generate_seatplan(request, exam_id, hall_id):
     return redirect('view_seatplan', exam_id=exam.id, hall_id=hall.id)
 
 
-
+@login_required(login_url='admin_login')
 def view_seatplan(request, exam_id, hall_id):
     plans = SeatPlan.objects.filter(exam_id=exam_id, hall_id=hall_id)
     exam = Exam.objects.get(id=exam_id)

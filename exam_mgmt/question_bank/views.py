@@ -1,8 +1,10 @@
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 from .forms import QuestionPaperForm
 from .models import QuestionPaper
 
 
+@login_required(login_url='admin_login')
 def question_bank_home(request):
     if request.method == 'POST':
         form = QuestionPaperForm(request.POST, request.FILES)

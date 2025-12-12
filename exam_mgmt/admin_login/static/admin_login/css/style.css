@@ -61,7 +61,7 @@ body {
     background-color: #3b3fc1;
 }
 
-/* Footer text */
+
 .footer-text {
     margin-top: 20px;
     font-size: 12px;
@@ -70,6 +70,12 @@ body {
 
 .error-message {
     color: red;
+    margin-bottom: 15px;
+    font-size: 14px;
+    text-align: left;
+}
+.success-message {
+    color: green;
     margin-bottom: 15px;
     font-size: 14px;
     text-align: left;
