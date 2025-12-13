@@ -574,3 +574,99 @@ document.addEventListener('DOMContentLoaded', () => {
   // render after possible merge
   render();
 });
+
+/* ------------------------- Auto Fill Routine ------------------------- */
+// Expects a backend endpoint that returns JSON like:
+// [
+//   {
+//     "course": "BCA",
+//     "semester": "1",
+//     "subject": "Computer Fundamentals and Applications",
+//     "paper_code": "CFA-101",
+//     "date": "2025-12-20",
+//     "start_time": "09:00",
+//     "duration": 90,
+//     "hall": "A1",
+//     "candidates": 60,
+//     "invigilators": "Dr. Sharma, Prof. Karki",
+//     "notes": ""
+//   }
+// ]
+// Wire a button with id="btnAutoFill" to trigger this.
+
+async function autoFillRoutine() {
+  const btn = document.getElementById('btnAutoFill');
+  if (btn) btn.disabled = true;
+  try {
+    // Attempt common URL paths for the endpoint
+    const candidates = [
+      '/exam_schedule/auto-fill/',
+      '/exam_schedule/teachers-subjects/',
+      window.location.pathname.replace(/\/create|\/new|\/$/i, '') + 'auto-fill/'
+    ];
+
+    let resp;
+    for (const url of candidates) {
+      try {
+        resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
+        if (resp && resp.ok) break;
+      } catch (_) { /* try next */ }
+    }
+    if (!resp || !resp.ok) {
+      alert('Auto-fill endpoint not found. Please add a JSON endpoint at /exam_schedule/auto-fill/.');
+      return;
+    }
+    const data = await resp.json();
+    if (!Array.isArray(data) || data.length === 0) {
+      alert('No auto-fill data returned from server.');
+      return;
+    }
+
+    // Clear existing rows (optional). Comment this out if you prefer merging.
+    // Schedule.clear();
+
+    // Map incoming items to our client-side model and add them.
+    const added = [];
+    for (const item of data) {
+      const row = {
+        id: uid(),
+        klass: String(item.course || '').trim(),
+        semester: String(item.semester || '').trim(),
+        subject: String(item.subject || '').trim(),
+        paper: String(item.paper_code || item.paper || '').trim(),
+        date: String(item.date || ''),
+        start: String(item.start_time || item.start || ''),
+        duration: parseInt(item.duration || $('#defaultDuration').value || '90', 10),
+        hall: String(item.hall || '').trim(),
+        candidates: parseInt(item.candidates || '0', 10) || undefined,
+        invigilators: String(item.invigilators || '').trim(),
+        notes: String(item.notes || '').trim(),
+      };
+
+      // Basic validation before adding
+      if (!row.klass || !row.subject || !row.date || !row.start) {
+        continue;
+      }
+      Schedule.add(row);
+      added.push(row);
+    }
+
+    if (added.length) {
+      render();
+      alert(`Auto-filled ${added.length} exam(s).`);
+    } else {
+      alert('No valid rows to auto-fill.');
+    }
+  } catch (e) {
+    console.error('Auto-fill failed:', e);
+    alert('Auto-fill failed: ' + e.message);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+// Bind the auto-fill button if present
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('btnAutoFill');
+  if (btn) btn.addEventListener('click', (e) => { e.preventDefault(); autoFillRoutine(); });
+});
