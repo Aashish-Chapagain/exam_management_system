@@ -179,7 +179,7 @@ function validateAll() {
         B = rows[j];
       const sameDate = A.date === B.date;
       const sameClass = A.klass === B.klass;
-      const samesemester = (A.semester || "") === (B.semester || "");
+      const sameSemester = (A.semester || "") === (B.semester || "");
 
       if (sameDate && overlaps(A._start, A._end, B._start, B._end)) {
         // Hall clash
@@ -193,7 +193,7 @@ function validateAll() {
         // Class/semester clash
         if (
           sameClass &&
-          (A.semester === "" || B.semester === "" || samesemester)
+          (A.semester === "" || B.semester === "" || sameSemester)
         ) {
           out.push({
             type: "class",
@@ -252,7 +252,7 @@ function render() {
   const tbody = $("#table tbody");
   tbody.innerHTML = "";
   const fc = $("#filterClass").value;
-  const fs = $("#filtersemester").value;
+  const fs = $("#filterSemester").value;
   const rows = Schedule.sorted().filter(
     (r) =>
       (fc ? r.klass === fc : true) && (fs ? (r.semester || "") === fs : true)
