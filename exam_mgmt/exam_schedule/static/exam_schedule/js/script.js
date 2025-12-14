@@ -582,7 +582,7 @@ document.addEventListener('DOMContentLoaded', () => {
 //     "course": "BCA",
 //     "semester": "1",
 //     "subject": "Computer Fundamentals and Applications",
-//     "paper_code": "CFA-101",
+//     "paper_code": "CFA-101"
 //     "date": "2025-12-20",
 //     "start_time": "09:00",
 //     "duration": 90,
@@ -598,7 +598,7 @@ async function autoFillRoutine() {
   const btn = document.getElementById('btnAutoFill');
   if (btn) btn.disabled = true;
   try {
-    // Attempt common URL paths for the endpoint
+   
     const candidates = [
       '/exam_schedule/auto-fill/',
       '/exam_schedule/teachers-subjects/',
@@ -622,10 +622,6 @@ async function autoFillRoutine() {
       return;
     }
 
-    // Clear existing rows (optional). Comment this out if you prefer merging.
-    // Schedule.clear();
-
-    // Map incoming items to our client-side model and add them.
     const added = [];
     for (const item of data) {
       const row = {
@@ -643,7 +639,7 @@ async function autoFillRoutine() {
         notes: String(item.notes || '').trim(),
       };
 
-      // Basic validation before adding
+ 
       if (!row.klass || !row.subject || !row.date || !row.start) {
         continue;
       }
@@ -665,7 +661,6 @@ async function autoFillRoutine() {
   }
 }
 
-// Bind the auto-fill button if present
 document.addEventListener('DOMContentLoaded', () => {
   const btn = document.getElementById('btnAutoFill');
   if (btn) btn.addEventListener('click', (e) => { e.preventDefault(); autoFillRoutine(); });

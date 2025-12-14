@@ -20,12 +20,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-d$$ah77-*$m^o%k&)^q&wnn6d3_ieay@_eg_b=c%!28)yijg82'
+# Load SECRET_KEY from environment. In dev, a fallback is provided.
+SECRET_KEY = config('SECRET_KEY', default='dev-unsafe-secret-key-change-me')
 
 # SECURITY WARNING: don't run with debug turned on in production!
+# Use env DEBUG with a safe default of True for local dev.
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = []
+# Comma-separated list via env; default allows localhost during dev.
+_allowed_hosts_raw = config('ALLOWED_HOSTS', default='127.0.0.1,localhost')
+ALLOWED_HOSTS = [h.strip() for h in _allowed_hosts_raw.split(',') if h.strip()]
 
 
 # Application definition
@@ -126,6 +130,7 @@ STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# Where collectstatic files are stored (used in production).
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -136,4 +141,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = 'admin_login'
 
 # Static files storage configuration
+STATICFILES_DIRS = [
+    # Add per-app static directories if using collectstatic during dev builds.
+    # Example: BASE_DIR / 'exam_mgmt' / 'static'
+]
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
