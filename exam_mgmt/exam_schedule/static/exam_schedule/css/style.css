@@ -235,3 +235,39 @@ tbody tr:hover {
   padding: 1px 6px;
   border-radius: 6px;
 }
+
+/* Print-friendly styles */
+@media print {
+  :root {
+    --bg: #ffffff;
+    --muted: #ffffff;
+    --card: #ffffff;
+    --ink: #000000;
+    --ink-dim: #000000;
+    --border: #cccccc;
+  }
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  header .actions,
+  .toolbar,
+  #examForm,
+  #btnAutoFill,
+  .footer {
+    display: none !important;
+  }
+  .card {
+    background: #ffffff !important;
+    box-shadow: none !important;
+    border-color: #dddddd !important;
+  }
+  thead th {
+    position: static !important;
+    background: #ffffff !important;
+  }
+  #table th:last-child,
+  #table td:last-child {
+    display: none !important;
+  }
+}

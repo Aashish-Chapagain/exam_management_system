@@ -216,3 +216,9 @@ $("#btnAutoFill").onclick = () => {
 
 /* ===================== Init ===================== */
 document.addEventListener("DOMContentLoaded", render);
+
+// Print support
+const printBtn = $("#btnPrint");
+if (printBtn) {
+  printBtn.addEventListener("click", () => window.print());
+}
