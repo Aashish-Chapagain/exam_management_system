@@ -4,7 +4,7 @@ from .forms import ExamForm
 from .models import Exam
 import json
 from .teachers_and_subjects import teachers, subjects
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseBadRequest
 from datetime import date, timedelta
 
 
@@ -97,6 +97,32 @@ def auto_fill(request):
             day_offset += 1
 
     return JsonResponse(payload, safe=False)
+
+
+@login_required
+def create_exam_api(request):
+    """Create an exam from JSON payload.
+    Expects fields compatible with ExamForm: course, semester, subject,
+    paper_code, date (YYYY-MM-DD), start_time (HH:MM), duration (int),
+    hall, candidates (int), invigilators, notes.
+    """
+    if request.method != 'POST':
+        return HttpResponseBadRequest('Only POST allowed')
+
+    try:
+        payload = json.loads(request.body.decode('utf-8'))
+    except Exception:
+        return HttpResponseBadRequest('Invalid JSON')
+
+    form = ExamForm(payload)
+    if form.is_valid():
+        exam = form.save()
+        return JsonResponse({
+            'id': str(exam.id),
+            'message': 'Created',
+        }, status=201)
+    else:
+        return JsonResponse({'errors': form.errors}, status=400)
 
 
 

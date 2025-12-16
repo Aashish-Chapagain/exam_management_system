@@ -13,17 +13,115 @@ function addMinutes(date, m) {
   return new Date(date.getTime() + m * 60000);
 }
 
-/* ===================== Subjects ===================== */
-const subjects = {
-  1: ["Computer Fundamentals and Applications","Society and Technology","English I","Mathematics I","Digital Logic"],
-  2: ["C Programming","Financial Accounting","English II","Mathematics II","Microprocessor and Computer Architecture"],
-  3: ["Data Structures and Algorithms","OOP in Java","Web Technology","Statistics I","Operating Systems"],
-  4: ["Numerical Methods","Software Engineering","DBMS","Computer Networking","Statistics II"],
-  5: ["MIS and E-Business","Dot Net Technology","Computer Graphics","Artificial Intelligence","Network Programming"],
-  6: ["Mobile Programming","Distributed System","Applied Economics","Advanced Java","Network Administration"],
-  7: ["Cyber Law","Cloud Computing","Image Processing","Database Administration","Knowledge Management"],
-  8: ["Operations Research","Multimedia System","E-Governance","Information Security"]
+function addDays(date, d) {
+  const nd = new Date(date);
+  nd.setDate(nd.getDate() + d);
+  return nd;
+}
+
+function daysBetween(a, b) {
+  const MS = 24 * 60 * 60 * 1000;
+  const d1 = new Date(a.getFullYear(), a.getMonth(), a.getDate());
+  const d2 = new Date(b.getFullYear(), b.getMonth(), b.getDate());
+  return Math.round((d2 - d1) / MS);
+}
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/* ===================== Subjects & Codes ===================== */
+const paperCodesBCA_TU = {
+  1: {
+    "Computer Fundamentals and Applications": "CACS101",
+    "Programming in C": "CACS102",
+    "Digital Logic": "CACS105",
+    "Mathematics I": "CAMT104",
+    "Professional Communication and Ethics": "CAEN103",
+    "Hardware Workshop": "CACS106"
+  },
+  
+  2: {
+    "Discrete Structure": "CACS151",
+    "Microprocessor and Computer Architecture": "CACS155",
+    "OOP in Java": "CACS153",
+    "Mathematics II": "CAMT154",
+    "Financial Accounting": "CAAC152",
+    "English II": "CAEN153",
+    "Principles of Management": "CACS156",   // sometimes seen
+    "UX/UI Design": "CACS155"               // some variants
+  },
+
+  3: {
+    "Data Structures and Algorithms": "CACS201",
+    "Database Management System": "CACS202",
+    "Web Technology I": "CACS203",
+    "System Analysis and Design": "CACS204",
+    "Probability and Statistics": "CAST202",
+    "Applied Economics": "CACS206"
+  },
+  
+  4: {
+    "Operating Systems": "CACS251",
+    "Software Engineering": "CACS252",
+    "Numerical Methods": "CACS253",
+    "Scripting Language": "CACS254",
+    "Database Management System": "CACS255",
+    "Project I": "CAPJ256"
+  },
+  
+  5: {
+    "MIS and E-Business": "CACS301",
+    "Dot Net Technology": "CACS302",
+    "Computer Networking": "CACS303",
+    "Introduction to Management": "CAMG304",
+    "Computer Graphics and Animation": "CACS305"
+  },
+
+  6: {
+    "Mobile Programming": "CACS351",
+    "Distributed System": "CACS352",
+    "Applied Economics": "CAEC353",
+    "Advanced Java Programming": "CACS354",
+    "Network Programming": "CACS355",
+    "Project II": "CAPJ356"
+  },
+
+  7: {
+    "Cyber Law and Professional Ethics": "CACS401",
+    "Cloud Computing": "CACS402",
+    "Internship": "CAIN403",
+    // some common electives:
+    "Image Processing": "CACS404",
+    "Database Administration": "CACS405",
+    "Network Administration": "CACS406",
+    "Advanced Dot Net Technology": "CACS408",
+    "E-Governance": "CACS409",
+    "Artificial Intelligence": "CACS410"
+  },
+
+  8: {
+    "Operations Research": "CAOR451",
+    "Project III": "CAPJ452",
+    // elective options for 8th:
+    "Database Programming": "CACS453",
+    "Geographical Information System": "CACS454",
+    "Data Analysis and Visualization": "CACS455",
+    "Machine Learning": "CACS456",
+    "Multimedia System": "CACS457",
+    "Knowledge Engineering": "CACS458"
+  }
 };
+
+function getPaperCode(sem, subjectName) {
+  const m = paperCodesBCA_TU[sem] || {};
+  return m[subjectName] || "";
+}
 
 /* ===================== teachers ===================== */
 const teachers = [
@@ -44,13 +142,34 @@ const teachers = [
     "Laxmi Ghimire",
 ]
     
+// Populate invigilators select options on load
+document.addEventListener("DOMContentLoaded", () => {
+  const invSel = $("#invigilators");
+  if (invSel && invSel.tagName === 'SELECT') {
+    invSel.innerHTML = `<option value="" disabled selected>Select invigilator</option>` +
+      teachers.map(t => `<option value="${t}">${t}</option>`).join("");
+  }
+});
 $("#semester").addEventListener("change", () => {
   const s = $("#semester").value;
   const sel = $("#subject");
   sel.innerHTML = `<option disabled selected>Select subject</option>`;
-  (subjects[s] || []).forEach(sub => {
+  const names = Object.keys(paperCodesBCA_TU[s] || {});
+  names.forEach(sub => {
     sel.innerHTML += `<option>${sub}</option>`;
   });
+  // Clear paper code when semester switches
+  const paper = $("#paper");
+  if (paper) paper.value = "";
+});
+
+// When subject changes, auto-fill its code into #paper
+$("#subject").addEventListener("change", () => {
+  const s = $("#semester").value;
+  const sub = $("#subject").value;
+  const code = getPaperCode(s, sub);
+  const paper = $("#paper");
+  if (paper) paper.value = code;
 });
 
 /* ===================== Store ===================== */
@@ -124,7 +243,7 @@ function render() {
         <td>${r.klass}</td>
         <td>${r.semester}</td>
         <td>${r.subject}</td>
-        <td>${r.paper || "-"}</td>
+        <td>${r.paper || r.paper_code || "-"}</td>
         <td>${r.hall || "-"}</td>
         <td>${r.invigilators || "-"}</td>
         <td>${r.duration}</td>
@@ -148,15 +267,17 @@ function render() {
 function readForm() {
   return {
     id: $("#editingId").value || uid(),
-    klass: $("#klass").value,
+    // Map to Django form field names
+    course: $("#klass").value,
     semester: $("#semester").value,
     subject: $("#subject").value,
     paper: $("#paper").value,
+    paper_code: $("#paper").value,
     date: $("#date").value,
-    start: $("#start").value,
+    start_time: $("#start").value,
     duration: +($("#duration").value || $("#defaultDuration").value),
     hall: $("#hall").value,
-    candidates: $("#candidates").value,
+    candidates: +($("#candidates").value || 0),
     invigilators: $("#invigilators").value,
     notes: $("#notes").value
   };
@@ -169,9 +290,35 @@ $("#btnAdd").onclick = e => {
     alert("Required fields missing");
     return;
   }
+  // Persist locally
   $("#editingId").value
     ? Schedule.update(r.id, r)
     : Schedule.add(r);
+
+  // Also POST to Django API
+  const csrftoken = document.cookie
+    .split('; ')
+    .find(row => row.startsWith('csrftoken='))
+    ?.split('=')[1];
+
+  fetch('/exam_schedule/api/exams/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': csrftoken || ''
+    },
+    body: JSON.stringify(r)
+  })
+    .then(res => {
+      if (!res.ok) throw new Error('Server error');
+      return res.json();
+    })
+    .then(data => {
+      console.log('Saved to server', data);
+    })
+    .catch(err => {
+      console.warn('Failed to save to server:', err);
+    });
   $("#examForm").reset();
   $("#editingId").value = "";
 };
@@ -184,7 +331,8 @@ $("#table").onclick = e => {
     $("#semester").dispatchEvent(new Event("change"));
     Object.keys(r).forEach(k => {
       const el = $("#" + k);
-      if (el) el.value = r[k];
+      if (!el) return;
+      el.value = r[k];
     });
   }
   if (e.target.dataset.d) {
@@ -195,22 +343,81 @@ $("#table").onclick = e => {
 
 /* ===================== Auto Scheduling ===================== */
 $("#btnAutoFill").onclick = () => {
-  const start = new Date($("#windowStart").value);
-  let day = start;
+  const sem = $("#semester").value;
+  const subs = Object.keys(paperCodesBCA_TU[sem] || {});
+  if (!sem || subs.length === 0) {
+    alert("Please select a semester with subjects");
+    return;
+  }
 
-  subjects[$("#semester").value]?.forEach((sub,i) => {
+  const wsStr = $("#windowStart").value;
+  const weStr = $("#windowEnd").value;
+  if (!wsStr || !weStr) {
+    alert("Please set Window Start and End dates");
+    return;
+  }
+  const ws = new Date(wsStr);
+  const we = new Date(weStr);
+  if (isNaN(ws.getTime()) || isNaN(we.getTime()) || ws > we) {
+    alert("Invalid date window. Ensure Start ≤ End.");
+    return;
+  }
+
+  const minGap = Math.max(0, +($("#minGap").value || 0));
+  const spacing = minGap + 1; // at least 1 day between exams means + (gap+1)
+  const totalDays = daysBetween(ws, we) + 1;
+  const n = subs.length;
+  const minDaysRequired = 1 + (n - 1) * spacing;
+  if (totalDays < minDaysRequired) {
+    alert(`Not enough days in window. Need at least ${minDaysRequired} days for ${n} exams with gap ${minGap}.`);
+    return;
+  }
+
+  // Distribute slack days randomly across start offset and gaps to randomize
+  let slack = totalDays - minDaysRequired;
+  const slots = new Array(n).fill(0); // slot 0 = start offset, 1..n-1 = extra days after each exam
+  while (slack-- > 0) {
+    const idx = Math.floor(Math.random() * n);
+    slots[idx]++;
+  }
+
+  // Build exam dates
+  const dates = [];
+  let cur = addDays(ws, slots[0]);
+  for (let i = 0; i < n; i++) {
+    dates.push(cur);
+    if (i < n - 1) {
+      cur = addDays(cur, spacing + slots[i + 1]);
+    }
+  }
+
+  // Randomize invigilators: choose exactly 1 per exam
+  const pickInvigilators = () => {
+    return shuffle(teachers)[0];
+  };
+
+  const klass = $("#klass")?.value || "BCA";
+  const startTime = $("#start")?.value || "09:00";
+  const duration = +($("#defaultDuration").value || 90);
+  const hall = $("#hall")?.value || "Hall A";
+
+  subs.forEach((sub, i) => {
+    const d = dates[i];
+    const code = getPaperCode(sem, sub);
     Schedule.add({
       id: uid(),
-      klass: "BCA",
-      semester: $("#semester").value,
+      klass,
+      semester: sem,
       subject: sub,
-      paper: "",
-      date: day.toISOString().slice(0,10),
-      start: "09:00",
-      duration: +$("#defaultDuration").value,
-      hall: "Hall A"
+      paper: code,
+      paper_code: code,
+      date: d.toISOString().slice(0, 10),
+      start: startTime,
+      duration: duration,
+      hall: hall,
+      invigilators: pickInvigilators(),
+      candidates: 0
     });
-    day.setDate(day.getDate() + 2);
   });
 };
 

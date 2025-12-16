@@ -98,8 +98,8 @@
     
           </div>
           <div>
-            <label for="paper">Paper / Code</label>
-            <input id="paper" name="paper_code" placeholder="e.g., ENG-101" />
+            <label for="paper">Subject Code</label>
+            <input id="paper" name="paper_code" placeholder="auto-filled from subject" />
           </div>
         </div>
         <div class="grid g-4" style="margin-top:12px">
@@ -127,7 +127,9 @@
           </div>
           <div>
             <label for="invigilators">Invigilator(s)</label>
-            <input id="invigilators" name="invigilators" placeholder="Comma-separated names" />
+            <select id="invigilators" name="invigilators" >
+              <!-- Options will be populated by JavaScript -->
+            </select>
           </div>
           <div>
             <label for="notes">Notes</label>
