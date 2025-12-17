@@ -153,23 +153,10 @@ document.addEventListener("DOMContentLoaded", () => {
 $("#semester").addEventListener("change", () => {
   const s = $("#semester").value;
   const sel = $("#subject");
-  sel.innerHTML = `<option disabled selected>Select subject</option>`;
-  const names = Object.keys(paperCodesBCA_TU[s] || {});
-  names.forEach(sub => {
+  sel.innerHTML = `<option value="" disabled selected>Select subject</option>`;
+  (Object.keys(paperCodesBCA_TU[s] || {})).forEach(sub => {
     sel.innerHTML += `<option>${sub}</option>`;
   });
-  // Clear paper code when semester switches
-  const paper = $("#paper");
-  if (paper) paper.value = "";
-});
-
-// When subject changes, auto-fill its code into #paper
-$("#subject").addEventListener("change", () => {
-  const s = $("#semester").value;
-  const sub = $("#subject").value;
-  const code = getPaperCode(s, sub);
-  const paper = $("#paper");
-  if (paper) paper.value = code;
 });
 
 /* ===================== Store ===================== */
@@ -227,33 +214,59 @@ function validate() {
 }
 
 /* ===================== Render ===================== */
+let sortDir = "asc";
 function render() {
   const tb = $("#table tbody");
   tb.innerHTML = "";
 
-  Schedule.rows
-    .sort((a,b)=>toDT(a.date,a.start)-toDT(b.date,b.start))
-    .forEach(r => {
-      const tr = document.createElement("tr");
-      const end = addMinutes(toDT(r.date, r.start), r.duration);
-      tr.innerHTML = `
-        <td>${r.date}</td>
-        <td>${r.start}</td>
-        <td>${end.toTimeString().slice(0,5)}</td>
-        <td>${r.klass}</td>
-        <td>${r.semester}</td>
-        <td>${r.subject}</td>
-        <td>${r.paper || r.paper_code || "-"}</td>
-        <td>${r.hall || "-"}</td>
-        <td>${r.invigilators || "-"}</td>
-        <td>${r.duration}</td>
-        <td>${r.candidates || "-"}</td>
-        <td>
-          <button data-e="${r.id}">Edit</button>
-          <button data-d="${r.id}">Delete</button>
-        </td>`;
-      tb.appendChild(tr);
-    });
+  const fClass = $("#filterClass")?.value || "";
+  const fSem = $("#filterSemester")?.value || "";
+
+  let rows = [...Schedule.rows];
+  // Apply filters
+  rows = rows.filter(r =>
+    (fClass ? r.klass === fClass : true) &&
+    (fSem ? String(r.semester) === String(fSem) : true)
+  );
+
+  // Sort by date/time according to toggle
+  rows.sort((a, b) => {
+    const diff = toDT(a.date, a.start) - toDT(b.date, b.start);
+    return sortDir === "asc" ? diff : -diff;
+  });
+
+  // Group headers by semester
+  let lastSemester = null;
+  rows.forEach(r => {
+    const currSem = r.semester ?? "";
+    if (currSem !== lastSemester) {
+      const gh = document.createElement("tr");
+      gh.className = "group-row";
+      gh.innerHTML = `<td colspan="12">Semester ${currSem || "-"}</td>`;
+      tb.appendChild(gh);
+      lastSemester = currSem;
+    }
+
+    const tr = document.createElement("tr");
+    const end = addMinutes(toDT(r.date, r.start), r.duration);
+    tr.innerHTML = `
+      <td>${r.date}</td>
+      <td>${r.start}</td>
+      <td>${end.toTimeString().slice(0,5)}</td>
+      <td>${r.klass}</td>
+      <td>${r.semester}</td>
+      <td>${r.subject}</td>
+      <td>${r.paper || "-"}</td>
+      <td>${r.hall || "-"}</td>
+      <td>${r.invigilators || "-"}</td>
+      <td>${r.duration}</td>
+      <td>${r.candidates || "-"}</td>
+      <td>
+        <button data-e="${r.id}">Edit</button>
+        <button data-d="${r.id}">Delete</button>
+      </td>`;
+    tb.appendChild(tr);
+  });
 
   const box = $("#validationSummary");
   const issues = validate();
@@ -267,19 +280,22 @@ function render() {
 function readForm() {
   return {
     id: $("#editingId").value || uid(),
-    // Map to Django form field names
-    course: $("#klass").value,
+    // App model fields
+    klass: $("#klass").value,
     semester: $("#semester").value,
     subject: $("#subject").value,
     paper: $("#paper").value,
-    paper_code: $("#paper").value,
     date: $("#date").value,
-    start_time: $("#start").value,
+    start: $("#start").value,
     duration: +($("#duration").value || $("#defaultDuration").value),
     hall: $("#hall").value,
     candidates: +($("#candidates").value || 0),
     invigilators: $("#invigilators").value,
-    notes: $("#notes").value
+    notes: $("#notes").value,
+    // Duplicate fields for Django API compatibility, if needed
+    course: $("#klass").value,
+    paper_code: $("#paper").value,
+    start_time: $("#start").value
   };
 }
 
@@ -429,3 +445,19 @@ const printBtn = $("#btnPrint");
 if (printBtn) {
   printBtn.addEventListener("click", () => window.print());
 }
+
+// Sort toggle
+const sortBtn = $("#btnSort");
+if (sortBtn) {
+  sortBtn.addEventListener("click", () => {
+    sortDir = sortDir === "asc" ? "desc" : "asc";
+    sortBtn.textContent = sortDir === "asc" ? "Sort by Date/Time" : "Sort by Date/Time (Desc)";
+    render();
+  });
+}
+
+// Filters
+const filterClass = $("#filterClass");
+const filterSemester = $("#filterSemester");
+filterClass?.addEventListener("change", render);
+filterSemester?.addEventListener("change", render);
