@@ -456,7 +456,7 @@ if (sortBtn) {
   });
 }
 
-// Filters
+
 const filterClass = $("#filterClass");
 const filterSemester = $("#filterSemester");
 filterClass?.addEventListener("change", render);
