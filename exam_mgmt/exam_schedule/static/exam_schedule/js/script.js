@@ -11,31 +11,30 @@ function addMinutes(date, m) {
 const paperCodesBCA_TU = {
   1: {
     "Computer Fundamentals and Applications": "CACS101",
-    "Programming in C": "CACS102",
     "Digital Logic": "CACS105",
     "Mathematics I": "CAMT104",
-    "Professional Communication and Ethics": "CAEN103",
-    "Hardware Workshop": "CACS106"
+    "Socity and Technology": "SAT103",
+    "English I": "CACS106"
   },
   2: {
-    "Discrete Structure": "CACS151",
+    
     "Microprocessor and Computer Architecture": "CACS155",
-    "OOP in Java": "CACS153",
+    "Programming in C": "CACS102",
     "Mathematics II": "CAMT154",
     "Financial Accounting": "CAAC152",
     "English II": "CAEN153",
-    "Principles of Management": "CACS156",
-    "UX/UI Design": "CACS155"
+
+  
   },
   3: {
     "Data Structures and Algorithms": "CACS201",
-    "Database Management System": "CACS202",
     "Web Technology I": "CACS203",
     "System Analysis and Design": "CACS204",
     "Probability and Statistics": "CAST202",
     "Applied Economics": "CACS206"
   },
   4: {
+    
     "Operating Systems": "CACS251",
     "Software Engineering": "CACS252",
     "Numerical Methods": "CACS253",
@@ -224,6 +223,142 @@ async function deleteExam(id) {
   if (!res.ok) throw new Error('Delete failed');
 }
 
+function autoSchedule() {
+  const windowStart = $("#windowStart")?.value;
+  const windowEnd = $("#windowEnd")?.value;
+  const minGap = parseInt($("#minGap")?.value ?? "1", 10);
+  const duration = parseInt($("#defaultDuration")?.value ?? "90", 10);
+  const startTime = "09:00";
+  const term = $("#term")?.value || "";
+  const course = "BCA";
+
+  if (!windowStart || !windowEnd) {
+    alert("Please set Window Start and Window End dates before auto-scheduling.");
+    return;
+  }
+
+  const start = new Date(windowStart);
+  const end = new Date(windowEnd);
+  if (start > end) {
+    alert("Window Start must be before Window End.");
+    return;
+  }
+
+  // Build list of all available date strings in the window
+  const availableDates = [];
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    availableDates.push(d.toISOString().slice(0, 10));
+  }
+
+  // Build exam list for SELECTED SEMESTER ONLY
+  const selectedSemester = $("#semester")?.value;
+  if (!selectedSemester) {
+    alert("Please select a semester before auto-scheduling.");
+    return;
+  }
+  const toSchedule = [];
+  const subjects = Object.keys(paperCodesBCA_TU[selectedSemester] || {});
+  if (subjects.length === 0) {
+    alert(`No subjects found for semester ${selectedSemester}.`);
+    return;
+  }
+  for (const subject of subjects) {
+    toSchedule.push({ semester: selectedSemester, subject });
+  }
+
+  // Track last scheduled date per semester
+  const lastDateBySem = {};
+
+  // Assign dates: iterate available dates, on each date assign as many exams as possible
+  // (one per unique semester allowed that day, respecting minGap from that sem's last exam)
+  const assignments = []; // {semester, subject, date}
+  const remaining = [...toSchedule];
+
+  for (const dateStr of availableDates) {
+    if (remaining.length === 0) break;
+    const currentDate = new Date(dateStr);
+    // Try each remaining exam in order; assign the first one whose semester gap is satisfied
+    for (let i = 0; i < remaining.length; i++) {
+      const { semester } = remaining[i];
+      const last = lastDateBySem[semester];
+      if (last !== undefined) {
+        const daysDiff = Math.round((currentDate - new Date(last)) / 86400000);
+        if (daysDiff < minGap) continue;
+      }
+      // Assign this exam to this date
+      assignments.push({ ...remaining[i], date: dateStr });
+      lastDateBySem[semester] = dateStr;
+      remaining.splice(i, 1);
+      break; // one exam per date slot
+    }
+  }
+
+  if (remaining.length > 0) {
+    alert(
+      `Not enough days in the window to schedule all exams with a ${minGap}-day minimum gap.\n` +
+      `${remaining.length} exam(s) could not be scheduled.\n` +
+      `Please widen the window or reduce the minimum gap.`
+    );
+    return;
+  }
+
+  // Confirm before saving
+  if (!confirm(`Auto-schedule Semester ${selectedSemester}?\n${assignments.length} exam(s) from ${windowStart} to ${windowEnd}\n\nProceed?`)) {
+    return;
+  }
+
+  // Save all assignments via API
+  const inv_list = teachers;
+  let inv_i = 0;
+
+  (async () => {
+    const csrftoken = document.cookie.split('; ').find(r => r.startsWith('csrftoken='))?.split('=')[1] || '';
+    let saved = 0;
+    let failed = 0;
+    for (const item of assignments) {
+      const paper_code = paperCodesBCA_TU[item.semester]?.[item.subject] || "";
+      const inv_a = inv_list[inv_i % inv_list.length] || "";
+      const inv_b = inv_list[(inv_i + 1) % inv_list.length] || "";
+      const invigilators = [inv_a, inv_b].filter(Boolean).join(", ");
+      inv_i++;
+
+      const payload = {
+        term,
+        course,
+        semester: item.semester,
+        subject: item.subject,
+        paper_code,
+        date: item.date,
+        start_time: startTime,
+        duration,
+        hall: "",
+        candidates: 0,
+        invigilators,
+        notes: "",
+      };
+
+      try {
+        const res = await fetch(examsApiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-CSRFToken": csrftoken },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          Schedule.rows.push(data.exam);
+          saved++;
+        } else {
+          failed++;
+        }
+      } catch {
+        failed++;
+      }
+    }
+    render();
+    alert(`Auto-scheduling complete: ${saved} exam(s) saved${failed ? `, ${failed} failed` : ""}.`);
+  })();
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const invSel = $("#invigilators");
   if (invSel) {
@@ -298,6 +433,8 @@ document.addEventListener("DOMContentLoaded", () => {
     sortDir = sortDir === "asc" ? "desc" : "asc";
     render();
   });
+
+  $("#btnAutoFill")?.addEventListener("click", autoSchedule);
 
   render();
 });
