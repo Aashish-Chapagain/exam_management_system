@@ -1,14 +1,39 @@
-from django.shortcuts import render, redirect
+import json
+from datetime import date, timedelta
+
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseBadRequest, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_http_methods
+
 from .forms import ExamForm
 from .models import Exam
-import json
-from .teachers_and_subjects import teachers, subjects
-from django.http import JsonResponse, HttpResponseBadRequest
-from datetime import date, timedelta
+from .teachers_and_subjects import subjects, teachers
+
+
+def _serialize_exam(exam):
+    return {
+        'id': exam.id,
+        'term': exam.term,
+        'course': exam.course,
+        'klass': exam.course,
+        'semester': exam.semester,
+        'subject': exam.subject,
+        'paper_code': exam.paper_code or '',
+        'paper': exam.paper_code or '',
+        'date': exam.date.isoformat(),
+        'start_time': exam.start_time.isoformat(timespec='minutes'),
+        'start': exam.start_time.isoformat(timespec='minutes'),
+        'duration': exam.duration,
+        'hall': exam.hall or '',
+        'candidates': exam.candidates,
+        'invigilators': exam.invigilators or '',
+        'notes': exam.notes or '',
+    }
 
 
 @login_required
+@require_http_methods(["GET", "POST"])
 def scheduler(request):
     if request.method == 'POST':
         form = ExamForm(request.POST)
@@ -19,41 +44,22 @@ def scheduler(request):
         form = ExamForm()
 
     exams_qs = Exam.objects.all().order_by('date', 'start_time')
+    exams_list = [_serialize_exam(e) for e in exams_qs]
 
-    
-    exams_list = []
-    for e in exams_qs:
-        exams_list.append({
-            'id': str(e.id),
-            'term': e.term,
-            'klass': e.course,
-            'semester': str(e.semester) if e.semester is not None else '',
-            'subject': e.subject,
-            'paper': e.paper_code or '',
-            'date': e.date.isoformat(),
-            'start': e.start_time.isoformat(timespec='minutes'),
-            'duration': e.duration,
-            'hall': e.hall or '',
-            'candidates': e.candidates,
-            'invigilators': e.invigilators or '',
-            'notes': e.notes or '',
-        })
-
-    exams_json = json.dumps(exams_list)
-
-    return render(request, 'exam_schedule/scheduler.html', {'form': form, 'exams': exams_qs, 'exams_json': exams_json})
+    return render(
+        request,
+        'exam_schedule/scheduler.html',
+        {
+            'form': form,
+            'exams': exams_qs,
+            'exams_list': exams_list,
+        },
+    )
 
 
 @login_required
+@require_http_methods(["GET"])
 def auto_fill(request):
-    """Return generated routine data from teachers_and_subjects.py as JSON.
-    Produces entries for course 'BCA' for all semesters with sequential dates.
-    Optional query params:
-      - course: default 'BCA'
-      - start_date: ISO date string to start from (default: tomorrow)
-      - start_time: HH:MM (default: 09:00)
-      - duration: minutes (default: 90)
-    """
     course = request.GET.get('course', 'BCA')
     try:
         start_date = date.fromisoformat(request.GET.get('start_date'))
@@ -65,7 +71,6 @@ def auto_fill(request):
     except ValueError:
         duration = 90
 
-    # Round-robin invigilators
     inv_list = list(teachers)
     inv_i = 0
 
@@ -80,34 +85,32 @@ def auto_fill(request):
             invigilators = ", ".join([x for x in [inv_a, inv_b] if x])
             inv_i += 1
 
-            payload.append({
-                'course': course,
-                'semester': str(sem),
-                'subject': subj,
-                'paper_code': '',
-                'date': (start_date + timedelta(days=day_offset)).isoformat(),
-                'start_time': start_time,
-                'duration': duration,
-                'hall': '',
-                'candidates': 0,
-                'invigilators': invigilators,
-                'notes': '',
-            })
-            # Ensure minimum 1-day gap between papers by default
+            payload.append(
+                {
+                    'course': course,
+                    'semester': sem,
+                    'subject': subj,
+                    'paper_code': '',
+                    'date': (start_date + timedelta(days=day_offset)).isoformat(),
+                    'start_time': start_time,
+                    'duration': duration,
+                    'hall': '',
+                    'candidates': 0,
+                    'invigilators': invigilators,
+                    'notes': '',
+                }
+            )
             day_offset += 1
 
     return JsonResponse(payload, safe=False)
 
 
 @login_required
-def create_exam_api(request):
-    """Create an exam from JSON payload.
-    Expects fields compatible with ExamForm: course, semester, subject,
-    paper_code, date (YYYY-MM-DD), start_time (HH:MM), duration (int),
-    hall, candidates (int), invigilators, notes.
-    """
-    if request.method != 'POST':
-        return HttpResponseBadRequest('Only POST allowed')
+@require_http_methods(["GET", "POST"])
+def exams_api(request):
+    if request.method == 'GET':
+        exams_qs = Exam.objects.all().order_by('date', 'start_time')
+        return JsonResponse([_serialize_exam(e) for e in exams_qs], safe=False)
 
     try:
         payload = json.loads(request.body.decode('utf-8'))
@@ -117,13 +120,26 @@ def create_exam_api(request):
     form = ExamForm(payload)
     if form.is_valid():
         exam = form.save()
-        return JsonResponse({
-            'id': str(exam.id),
-            'message': 'Created',
-        }, status=201)
-    else:
-        return JsonResponse({'errors': form.errors}, status=400)
+        return JsonResponse({'message': 'Created', 'exam': _serialize_exam(exam)}, status=201)
+    return JsonResponse({'errors': form.errors}, status=400)
 
 
+@login_required
+@require_http_methods(["PUT", "DELETE"])
+def exam_detail_api(request, exam_id):
+    exam = get_object_or_404(Exam, id=exam_id)
 
+    if request.method == 'DELETE':
+        exam.delete()
+        return JsonResponse({'message': 'Deleted'})
 
+    try:
+        payload = json.loads(request.body.decode('utf-8'))
+    except Exception:
+        return HttpResponseBadRequest('Invalid JSON')
+
+    form = ExamForm(payload, instance=exam)
+    if form.is_valid():
+        updated_exam = form.save()
+        return JsonResponse({'message': 'Updated', 'exam': _serialize_exam(updated_exam)})
+    return JsonResponse({'errors': form.errors}, status=400)
