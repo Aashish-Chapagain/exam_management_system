@@ -1,9 +1,4 @@
-/* ===================== Utilities ===================== */
-const $ = q => document.querySelector(q);
-const $$ = q => document.querySelectorAll(q);
-
-const uid = () =>
-  "x" + Math.random().toString(36).slice(2, 10);
+const $ = (q) => document.querySelector(q);
 
 function toDT(d, t) {
   return new Date(`${d}T${t}`);
@@ -13,29 +8,6 @@ function addMinutes(date, m) {
   return new Date(date.getTime() + m * 60000);
 }
 
-function addDays(date, d) {
-  const nd = new Date(date);
-  nd.setDate(nd.getDate() + d);
-  return nd;
-}
-
-function daysBetween(a, b) {
-  const MS = 24 * 60 * 60 * 1000;
-  const d1 = new Date(a.getFullYear(), a.getMonth(), a.getDate());
-  const d2 = new Date(b.getFullYear(), b.getMonth(), b.getDate());
-  return Math.round((d2 - d1) / MS);
-}
-
-function shuffle(arr) {
-  const a = arr.slice();
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-/* ===================== Subjects & Codes ===================== */
 const paperCodesBCA_TU = {
   1: {
     "Computer Fundamentals and Applications": "CACS101",
@@ -45,7 +17,6 @@ const paperCodesBCA_TU = {
     "Professional Communication and Ethics": "CAEN103",
     "Hardware Workshop": "CACS106"
   },
-  
   2: {
     "Discrete Structure": "CACS151",
     "Microprocessor and Computer Architecture": "CACS155",
@@ -53,10 +24,9 @@ const paperCodesBCA_TU = {
     "Mathematics II": "CAMT154",
     "Financial Accounting": "CAAC152",
     "English II": "CAEN153",
-    "Principles of Management": "CACS156",   // sometimes seen
-    "UX/UI Design": "CACS155"               // some variants
+    "Principles of Management": "CACS156",
+    "UX/UI Design": "CACS155"
   },
-
   3: {
     "Data Structures and Algorithms": "CACS201",
     "Database Management System": "CACS202",
@@ -65,7 +35,6 @@ const paperCodesBCA_TU = {
     "Probability and Statistics": "CAST202",
     "Applied Economics": "CACS206"
   },
-  
   4: {
     "Operating Systems": "CACS251",
     "Software Engineering": "CACS252",
@@ -74,7 +43,6 @@ const paperCodesBCA_TU = {
     "Database Management System": "CACS255",
     "Project I": "CAPJ256"
   },
-  
   5: {
     "MIS and E-Business": "CACS301",
     "Dot Net Technology": "CACS302",
@@ -82,7 +50,6 @@ const paperCodesBCA_TU = {
     "Introduction to Management": "CAMG304",
     "Computer Graphics and Animation": "CACS305"
   },
-
   6: {
     "Mobile Programming": "CACS351",
     "Distributed System": "CACS352",
@@ -91,12 +58,10 @@ const paperCodesBCA_TU = {
     "Network Programming": "CACS355",
     "Project II": "CAPJ356"
   },
-
   7: {
     "Cyber Law and Professional Ethics": "CACS401",
     "Cloud Computing": "CACS402",
     "Internship": "CAIN403",
-    // some common electives:
     "Image Processing": "CACS404",
     "Database Administration": "CACS405",
     "Network Administration": "CACS406",
@@ -104,11 +69,9 @@ const paperCodesBCA_TU = {
     "E-Governance": "CACS409",
     "Artificial Intelligence": "CACS410"
   },
-
   8: {
     "Operations Research": "CAOR451",
     "Project III": "CAPJ452",
-    // elective options for 8th:
     "Database Programming": "CACS453",
     "Geographical Information System": "CACS454",
     "Data Analysis and Visualization": "CACS455",
@@ -118,149 +81,77 @@ const paperCodesBCA_TU = {
   }
 };
 
-function getPaperCode(sem, subjectName) {
-  const m = paperCodesBCA_TU[sem] || {};
-  return m[subjectName] || "";
+const teachers = [
+  "Ramesh Shrestha", "Mina Rana", "Kamal Chhetri", "Saraswati Acharya", "Bina Gurung",
+  "Sanjay Adhikari", "Nirajan Poudel", "Rupesh Khadka", "Sushma Koirala", "Deepak Gautam",
+  "Anita Panta", "Krishna Rajbhandari", "Sabina Thapa", "Hari Prasad Neupane", "Laxmi Ghimire"
+];
+
+let sortDir = "asc";
+const form = $("#examForm");
+const examsApiUrl = form?.dataset.examsApiUrl;
+const examDetailTemplate = form?.dataset.examDetailApiTemplate;
+const initialData = JSON.parse(document.getElementById("init-exams")?.textContent || "[]");
+const Schedule = { rows: initialData };
+
+function examDetailUrl(id) {
+  return examDetailTemplate.replace(/0\/$/, `${id}/`);
 }
 
-/* ===================== teachers ===================== */
-const teachers = [
-    "Ramesh Shrestha",
-    "Mina Rana",
-    "Kamal Chhetri",
-    "Saraswati Acharya",
-    "Bina Gurung",
-    "Sanjay Adhikari",
-    "Nirajan Poudel",
-    "Rupesh Khadka",
-    "Sushma Koirala",
-    "Deepak Gautam",
-    "Anita Panta",
-    "Krishna Rajbhandari",
-    "Sabina Thapa",
-    "Hari Prasad Neupane",
-    "Laxmi Ghimire",
-]
-    
-// Populate invigilators select options on load
-document.addEventListener("DOMContentLoaded", () => {
-  const invSel = $("#invigilators");
-  if (invSel && invSel.tagName === 'SELECT') {
-    invSel.innerHTML = `<option value="" disabled selected>Select invigilator</option>` +
-      teachers.map(t => `<option value="${t}">${t}</option>`).join("");
-  }
-});
-$("#semester").addEventListener("change", () => {
-  const s = $("#semester").value;
-  const sel = $("#subject");
-  sel.innerHTML = `<option value="" disabled selected>Select subject</option>`;
-  (Object.keys(paperCodesBCA_TU[s] || {})).forEach(sub => {
-    sel.innerHTML += `<option>${sub}</option>`;
-  });
-});
-
-/* ===================== Store ===================== */
-const KEY = "exam_schedule";
-const Store = {
-  load: () => JSON.parse(localStorage.getItem(KEY) || "[]"),
-  save: d => localStorage.setItem(KEY, JSON.stringify(d))
-};
-
-/* ===================== Schedule ===================== */
-const Schedule = {
-  rows: Store.load(),
-
-  add(r) {
-    this.rows.push(r);
-    this.sync();
-  },
-  update(id, r) {
-    const i = this.rows.findIndex(x => x.id === id);
-    if (i !== -1) this.rows[i] = r;
-    this.sync();
-  },
-  remove(id) {
-    this.rows = this.rows.filter(x => x.id !== id);
-    this.sync();
-  },
-  sync() {
-    Store.save(this.rows);
-    render();
-  }
-};
-
-/* ===================== Validation ===================== */
-function validate() {
+function validate(rows) {
   const issues = [];
-  for (let i = 0; i < Schedule.rows.length; i++) {
-    for (let j = i + 1; j < Schedule.rows.length; j++) {
-      const A = Schedule.rows[i];
-      const B = Schedule.rows[j];
-
-      const aS = toDT(A.date, A.start);
+  for (let i = 0; i < rows.length; i++) {
+    for (let j = i + 1; j < rows.length; j++) {
+      const A = rows[i];
+      const B = rows[j];
+      const aS = toDT(A.date, A.start || A.start_time);
       const aE = addMinutes(aS, A.duration);
-      const bS = toDT(B.date, B.start);
+      const bS = toDT(B.date, B.start || B.start_time);
       const bE = addMinutes(bS, B.duration);
-
       if (A.date === B.date && aS < bE && bS < aE) {
-        if (A.hall && A.hall === B.hall)
-          issues.push("Hall clash detected");
-        if (A.klass === B.klass && A.semester === B.semester)
-          issues.push("Class overlap detected");
+        if (A.hall && A.hall === B.hall) issues.push("Hall clash detected");
+        if (A.course === B.course && String(A.semester) === String(B.semester)) {
+          issues.push("Course/Semester overlap detected");
+        }
       }
     }
   }
   return issues;
 }
 
-/* ===================== Render ===================== */
-let sortDir = "asc";
 function render() {
   const tb = $("#table tbody");
+  if (!tb) return;
   tb.innerHTML = "";
 
   const fClass = $("#filterClass")?.value || "";
   const fSem = $("#filterSemester")?.value || "";
-
-  let rows = [...Schedule.rows];
-  // Apply filters
-  rows = rows.filter(r =>
-    (fClass ? r.klass === fClass : true) &&
+  let rows = [...Schedule.rows].filter(r =>
+    (fClass ? r.course === fClass : true) &&
     (fSem ? String(r.semester) === String(fSem) : true)
   );
 
-  // Sort by date/time according to toggle
   rows.sort((a, b) => {
-    const diff = toDT(a.date, a.start) - toDT(b.date, b.start);
+    const diff = toDT(a.date, a.start || a.start_time) - toDT(b.date, b.start || b.start_time);
     return sortDir === "asc" ? diff : -diff;
   });
 
-  // Group headers by semester
-  let lastSemester = null;
-  rows.forEach(r => {
-    const currSem = r.semester ?? "";
-    if (currSem !== lastSemester) {
-      const gh = document.createElement("tr");
-      gh.className = "group-row";
-      gh.innerHTML = `<td colspan="12">Semester ${currSem || "-"}</td>`;
-      tb.appendChild(gh);
-      lastSemester = currSem;
-    }
-
+  rows.forEach((r) => {
+    const start = r.start || r.start_time;
+    const end = addMinutes(toDT(r.date, start), r.duration).toTimeString().slice(0, 5);
     const tr = document.createElement("tr");
-    const end = addMinutes(toDT(r.date, r.start), r.duration);
     tr.innerHTML = `
       <td>${r.date}</td>
-      <td>${r.start}</td>
-      <td>${end.toTimeString().slice(0,5)}</td>
-      <td>${r.klass}</td>
+      <td>${start}</td>
+      <td>${end}</td>
+      <td>${r.course}</td>
       <td>${r.semester}</td>
       <td>${r.subject}</td>
-      <td>${r.paper || "-"}</td>
+      <td>${r.paper_code || "-"}</td>
       <td>${r.hall || "-"}</td>
       <td>${r.invigilators || "-"}</td>
       <td>${r.duration}</td>
-      <td>${r.candidates || "-"}</td>
+      <td>${r.candidates || 0}</td>
       <td>
         <button data-e="${r.id}">Edit</button>
         <button data-d="${r.id}">Delete</button>
@@ -269,194 +160,134 @@ function render() {
   });
 
   const box = $("#validationSummary");
-  const issues = validate();
-  box.style.display = "block";
-  box.textContent = issues.length
-    ? `⚠ ${issues.length} issue(s) found`
-    : "✅ No issues detected";
+  const issues = validate(rows);
+  if (box) {
+    box.style.display = "block";
+    box.textContent = issues.length ? `⚠ ${issues.length} issue(s) found` : "✅ No issues detected";
+  }
 }
 
-/* ===================== Form ===================== */
 function readForm() {
   return {
-    id: $("#editingId").value || uid(),
-    // App model fields
-    klass: $("#klass").value,
-    semester: $("#semester").value,
+    term: $("#term")?.value || "Regular",
+    course: $("#klass").value,
+    semester: Number($("#semester").value),
     subject: $("#subject").value,
-    paper: $("#paper").value,
+    paper_code: $("#paper").value,
     date: $("#date").value,
-    start: $("#start").value,
-    duration: +($("#duration").value || $("#defaultDuration").value),
+    start_time: $("#start").value,
+    duration: Number($("#duration").value || $("#defaultDuration").value || 90),
     hall: $("#hall").value,
-    candidates: +($("#candidates").value || 0),
+    candidates: Number($("#candidates").value || 0),
     invigilators: $("#invigilators").value,
     notes: $("#notes").value,
-    // Duplicate fields for Django API compatibility, if needed
-    course: $("#klass").value,
-    paper_code: $("#paper").value,
-    start_time: $("#start").value
   };
 }
 
-$("#btnAdd").onclick = e => {
-  e.preventDefault();
-  const r = readForm();
-  if (!r.klass || !r.subject || !r.date || !r.start) {
-    alert("Required fields missing");
-    return;
+function fillForm(r) {
+  $("#editingId").value = r.id;
+  $("#term").value = r.term || "";
+  $("#klass").value = r.course;
+  $("#semester").value = r.semester;
+  $("#semester").dispatchEvent(new Event("change"));
+  $("#subject").value = r.subject;
+  $("#paper").value = r.paper_code || "";
+  $("#date").value = r.date;
+  $("#start").value = r.start || r.start_time;
+  $("#duration").value = r.duration;
+  $("#hall").value = r.hall;
+  $("#candidates").value = r.candidates;
+  $("#invigilators").value = r.invigilators;
+  $("#notes").value = r.notes;
+}
+
+async function saveExam(payload, id) {
+  const csrftoken = document.cookie.split('; ').find(r => r.startsWith('csrftoken='))?.split('=')[1] || '';
+  const res = await fetch(id ? examDetailUrl(id) : examsApiUrl, {
+    method: id ? 'PUT' : 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(JSON.stringify(data.errors || data));
   }
-  // Persist locally
-  $("#editingId").value
-    ? Schedule.update(r.id, r)
-    : Schedule.add(r);
+  return data.exam;
+}
 
-  // Also POST to Django API
-  const csrftoken = document.cookie
-    .split('; ')
-    .find(row => row.startsWith('csrftoken='))
-    ?.split('=')[1];
+async function deleteExam(id) {
+  const csrftoken = document.cookie.split('; ').find(r => r.startsWith('csrftoken='))?.split('=')[1] || '';
+  const res = await fetch(examDetailUrl(id), {
+    method: 'DELETE',
+    headers: { 'X-CSRFToken': csrftoken },
+  });
+  if (!res.ok) throw new Error('Delete failed');
+}
 
-  fetch('/exam_schedule/api/exams/', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRFToken': csrftoken || ''
-    },
-    body: JSON.stringify(r)
-  })
-    .then(res => {
-      if (!res.ok) throw new Error('Server error');
-      return res.json();
-    })
-    .then(data => {
-      console.log('Saved to server', data);
-    })
-    .catch(err => {
-      console.warn('Failed to save to server:', err);
-    });
-  $("#examForm").reset();
-  $("#editingId").value = "";
-};
-
-$("#table").onclick = e => {
-  if (e.target.dataset.e) {
-    const r = Schedule.rows.find(x => x.id === e.target.dataset.e);
-    $("#editingId").value = r.id;
-    $("#semester").value = r.semester;
-    $("#semester").dispatchEvent(new Event("change"));
-    Object.keys(r).forEach(k => {
-      const el = $("#" + k);
-      if (!el) return;
-      el.value = r[k];
-    });
-  }
-  if (e.target.dataset.d) {
-    if (confirm("Delete?"))
-      Schedule.remove(e.target.dataset.d);
-  }
-};
-
-/* ===================== Auto Scheduling ===================== */
-$("#btnAutoFill").onclick = () => {
-  const sem = $("#semester").value;
-  const subs = Object.keys(paperCodesBCA_TU[sem] || {});
-  if (!sem || subs.length === 0) {
-    alert("Please select a semester with subjects");
-    return;
+document.addEventListener("DOMContentLoaded", () => {
+  const invSel = $("#invigilators");
+  if (invSel) {
+    invSel.innerHTML = `<option value="" selected>Select invigilator</option>` +
+      teachers.map(t => `<option value="${t}">${t}</option>`).join("");
   }
 
-  const wsStr = $("#windowStart").value;
-  const weStr = $("#windowEnd").value;
-  if (!wsStr || !weStr) {
-    alert("Please set Window Start and End dates");
-    return;
-  }
-  const ws = new Date(wsStr);
-  const we = new Date(weStr);
-  if (isNaN(ws.getTime()) || isNaN(we.getTime()) || ws > we) {
-    alert("Invalid date window. Ensure Start ≤ End.");
-    return;
-  }
-
-  const minGap = Math.max(0, +($("#minGap").value || 0));
-  const spacing = minGap + 1; // at least 1 day between exams means + (gap+1)
-  const totalDays = daysBetween(ws, we) + 1;
-  const n = subs.length;
-  const minDaysRequired = 1 + (n - 1) * spacing;
-  if (totalDays < minDaysRequired) {
-    alert(`Not enough days in window. Need at least ${minDaysRequired} days for ${n} exams with gap ${minGap}.`);
-    return;
-  }
-
-  // Distribute slack days randomly across start offset and gaps to randomize
-  let slack = totalDays - minDaysRequired;
-  const slots = new Array(n).fill(0); // slot 0 = start offset, 1..n-1 = extra days after each exam
-  while (slack-- > 0) {
-    const idx = Math.floor(Math.random() * n);
-    slots[idx]++;
-  }
-
-  // Build exam dates
-  const dates = [];
-  let cur = addDays(ws, slots[0]);
-  for (let i = 0; i < n; i++) {
-    dates.push(cur);
-    if (i < n - 1) {
-      cur = addDays(cur, spacing + slots[i + 1]);
-    }
-  }
-
-  // Randomize invigilators: choose exactly 1 per exam
-  const pickInvigilators = () => {
-    return shuffle(teachers)[0];
-  };
-
-  const klass = $("#klass")?.value || "BCA";
-  const startTime = $("#start")?.value || "09:00";
-  const duration = +($("#defaultDuration").value || 90);
-  const hall = $("#hall")?.value || "Hall A";
-
-  subs.forEach((sub, i) => {
-    const d = dates[i];
-    const code = getPaperCode(sem, sub);
-    Schedule.add({
-      id: uid(),
-      klass,
-      semester: sem,
-      subject: sub,
-      paper: code,
-      paper_code: code,
-      date: d.toISOString().slice(0, 10),
-      start: startTime,
-      duration: duration,
-      hall: hall,
-      invigilators: pickInvigilators(),
-      candidates: 0
+  $("#semester")?.addEventListener("change", () => {
+    const s = $("#semester").value;
+    const sel = $("#subject");
+    sel.innerHTML = `<option value="" disabled selected>Select subject</option>`;
+    Object.keys(paperCodesBCA_TU[s] || {}).forEach(sub => {
+      sel.innerHTML += `<option>${sub}</option>`;
     });
   });
-};
 
-/* ===================== Init ===================== */
-document.addEventListener("DOMContentLoaded", render);
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const payload = readForm();
+    if (!payload.course || !payload.subject || !payload.date || !payload.start_time) {
+      alert("Required fields missing");
+      return;
+    }
 
-// Print support
-const printBtn = $("#btnPrint");
-if (printBtn) {
-  printBtn.addEventListener("click", () => window.print());
-}
+    try {
+      const editingId = $("#editingId").value;
+      const saved = await saveExam(payload, editingId || null);
+      const index = Schedule.rows.findIndex((r) => String(r.id) === String(saved.id));
+      if (index >= 0) Schedule.rows[index] = saved;
+      else Schedule.rows.push(saved);
+      render();
+      form.reset();
+      $("#editingId").value = "";
+    } catch (err) {
+      alert(`Failed to save exam: ${err.message}`);
+    }
+  });
 
-// Sort toggle
-const sortBtn = $("#btnSort");
-if (sortBtn) {
-  sortBtn.addEventListener("click", () => {
+  $("#table")?.addEventListener("click", async (e) => {
+    const editId = e.target.dataset.e;
+    const delId = e.target.dataset.d;
+    if (editId) {
+      const row = Schedule.rows.find((r) => String(r.id) === String(editId));
+      if (row) fillForm(row);
+    }
+    if (delId) {
+      if (!confirm("Delete this exam?")) return;
+      try {
+        await deleteExam(delId);
+        Schedule.rows = Schedule.rows.filter((r) => String(r.id) !== String(delId));
+        render();
+      } catch {
+        alert("Failed to delete exam");
+      }
+    }
+  });
+
+  $("#btnSort")?.addEventListener("click", () => {
     sortDir = sortDir === "asc" ? "desc" : "asc";
-    sortBtn.textContent = sortDir === "asc" ? "Sort by Date/Time" : "Sort by Date/Time (Desc)";
     render();
   });
 }
 
-
+// Filters
 const filterClass = $("#filterClass");
 const filterSemester = $("#filterSemester");
 filterClass?.addEventListener("change", render);

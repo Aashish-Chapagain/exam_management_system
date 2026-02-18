@@ -61,7 +61,7 @@
 
     <section class="card">
       <h2>➕ Exam</h2>
-      <form id="examForm" method="POST">
+      <form id="examForm" method="POST" data-exams-api-url="{% url 'exam_api' %}" data-exam-detail-api-template="{% url 'exam_detail_api' 0 %}">
         {% csrf_token %}
 
         <input type="hidden" id="editingId" />
@@ -204,7 +204,7 @@
               <th>Start</th>
               <th>End</th>
               <th>Class</th>
-              <th>Section</th>
+              <th>Semester</th>
               <th>Subject</th>
               <th>Paper</th>
               <th>Hall</th>

@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django import forms
@@ -59,6 +59,7 @@ def select_exam_hall(request):
     })
 
 
+@login_required(login_url='admin_login')
 def create_hall(request):
     # simple create hall view; can be invoked with ?name=HallName
     initial_name = request.GET.get('name', '')
@@ -75,9 +76,10 @@ def create_hall(request):
 
 @login_required(login_url='admin_login')
 def generate_seatplan(request, exam_id, hall_id):
-    exam = Exam.objects.get(id=exam_id)
-    hall = Hall.objects.get(id=hall_id)
-    students = Student.objects.all()[:exam.candidates]  
+    exam = get_object_or_404(Exam, id=exam_id)
+    hall = get_object_or_404(Hall, id=hall_id)
+    hall_capacity = hall.rows * hall.cols
+    students = Student.objects.order_by('roll_no')[: min(exam.candidates, hall_capacity)]
    
     SeatPlan.objects.filter(exam=exam, hall=hall).delete()
 
@@ -101,6 +103,6 @@ def generate_seatplan(request, exam_id, hall_id):
 @login_required(login_url='admin_login')
 def view_seatplan(request, exam_id, hall_id):
     plans = SeatPlan.objects.filter(exam_id=exam_id, hall_id=hall_id)
-    exam = Exam.objects.get(id=exam_id)
-    hall = Hall.objects.get(id=hall_id)
+    exam = get_object_or_404(Exam, id=exam_id)
+    hall = get_object_or_404(Hall, id=hall_id)
     return render(request, "seatplan/view_seatplan.html", {"plans": plans, "exam": exam, "hall": hall})
