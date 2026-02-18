@@ -231,14 +231,27 @@ document.addEventListener("DOMContentLoaded", () => {
       teachers.map(t => `<option value="${t}">${t}</option>`).join("");
   }
 
-  $("#semester")?.addEventListener("change", () => {
-    const s = $("#semester").value;
-    const sel = $("#subject");
-    sel.innerHTML = `<option value="" disabled selected>Select subject</option>`;
+  const semesterEl = $("#semester");
+  const subjectEl = $("#subject");
+  const paperEl = $("#paper");
+
+  function populateSubjects() {
+    const s = semesterEl?.value;
+    if (!subjectEl) return;
+    subjectEl.innerHTML = `<option value="" disabled selected>Select subject</option>`;
     Object.keys(paperCodesBCA_TU[s] || {}).forEach(sub => {
-      sel.innerHTML += `<option>${sub}</option>`;
+      subjectEl.innerHTML += `<option>${sub}</option>`;
     });
-  });
+    if (paperEl) paperEl.value = "";
+  }
+
+  function syncPaperCode() {
+    if (!semesterEl || !subjectEl || !paperEl) return;
+    paperEl.value = paperCodesBCA_TU[semesterEl.value]?.[subjectEl.value] || "";
+  }
+
+  semesterEl?.addEventListener("change", populateSubjects);
+  subjectEl?.addEventListener("change", syncPaperCode);
 
   form?.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -285,7 +298,9 @@ document.addEventListener("DOMContentLoaded", () => {
     sortDir = sortDir === "asc" ? "desc" : "asc";
     render();
   });
-}
+
+  render();
+});
 
 // Filters
 const filterClass = $("#filterClass");
