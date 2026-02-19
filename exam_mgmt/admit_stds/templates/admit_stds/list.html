@@ -10,16 +10,17 @@
 <div class="container">
     <a class="btn" href="{% url 'admit_create' %}">Add Admitted Student</a>
     <table>
-        <tr><th>Roll</th><th>Name</th><th>Exam</th><th>Admitted At</th></tr>
+        <tr><th>Roll No</th><th>Name</th><th>Exam</th><th>Exam Date</th><th>Admitted At</th></tr>
         {% for s in students %}
         <tr>
-            <td>{{ s.roll_no }}</td>
-            <td>{{ s.name }}</td>
+            <td>{{ s.get_roll_no }}</td>
+            <td>{{ s.get_name }}</td>
             <td>{{ s.exam }}</td>
-            <td>{{ s.admitted_at }}</td>
+            <td>{{ s.exam_date|default:"Not set" }}</td>
+            <td>{{ s.admitted_at|date:"Y-m-d H:i" }}</td>
         </tr>
         {% empty %}
-        <tr><td colspan="4">No admitted students</td></tr>
+        <tr><td colspan="5">No admitted students yet. Click "Add Admitted Student" to create one.</td></tr>
         {% endfor %}
     </table>
 </div>

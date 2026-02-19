@@ -2,13 +2,19 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from .models import AdmittedStudent
+from std_account.models import Student
 from django import forms
 
 
 class AdmittedStudentForm(forms.ModelForm):
+    student = forms.ModelChoiceField(
+        queryset=Student.objects.filter(fees_paid=True),
+        label="Student (Only students who paid fees)"
+    )
+    
     class Meta:
         model = AdmittedStudent
-        fields = ['name', 'roll_no', 'exam']
+        fields = ['student', 'exam', 'exam_date']
 
 
 @login_required(login_url='admin_login')
