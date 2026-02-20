@@ -1,0 +1,70 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manage Halls</title>
+    <link rel="stylesheet" href="{% static 'seatplan/css/main.css' %}">
+</head>
+<body>
+<div class="navbar">
+    <span class="navbar-title">Manage Halls</span>
+    <div class="navbar-actions">
+        <button id="themeToggle" class="theme-toggle-btn"><span class="theme-icon">🌙</span></button>
+        <a href="{% url 'seatplan_home' %}" class="back-link">← Back</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="page-header">
+        <h1>Edit Halls</h1>
+        <p class="page-description">Update rows/cols or remove halls.</p>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Hall</th>
+                    <th>Rows</th>
+                    <th>Cols</th>
+                    <th>Capacity</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for hall in halls %}
+                <tr>
+                    <td><strong>{{ hall.name }}</strong></td>
+                    <td>
+                        <form id="hall-form-{{ hall.id }}" method="post" style="margin:0;">
+                            {% csrf_token %}
+                            <input type="hidden" name="hall_id" value="{{ hall.id }}" />
+                        </form>
+                        <input form="hall-form-{{ hall.id }}" type="number" name="rows" min="1" value="{{ hall.rows }}" class="table-input" />
+                    </td>
+                    <td>
+                        <input form="hall-form-{{ hall.id }}" type="number" name="cols" min="1" value="{{ hall.cols }}" class="table-input" />
+                    </td>
+                    <td>{{ hall.capacity }}</td>
+                    <td class="table-actions">
+                        <button class="btn btn-sm" form="hall-form-{{ hall.id }}" type="submit" name="action" value="update">Save</button>
+                        <button class="btn btn-danger btn-sm" form="hall-form-{{ hall.id }}" type="submit" name="action" value="delete" onclick="return confirm('Delete {{ hall.name }}? This will remove related seat plans.');">Delete</button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align:center;">No halls found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin-top:20px;">
+        <a class="btn ghost" href="{% url 'seatplan_create_hall' %}">➕ Add New Hall</a>
+    </div>
+</div>
+
+<script src="{% static 'seatplan/js/theme.js' %}"></script>
+</body>
+</html>

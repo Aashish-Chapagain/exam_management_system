@@ -8,6 +8,7 @@ urlpatterns = [
      # selection page
      path('select/', views.select_exam_hall, name="seatplan_select"),
      path('create/', views.create_hall, name='seatplan_create_hall'),
+     path('manage-halls/', views.manage_halls, name='seatplan_manage_halls'),
 
      # actions
      path('generate/<int:exam_id>/<str:hall_ids>/', views.generate_seatplan, name="generate_seatplan"),

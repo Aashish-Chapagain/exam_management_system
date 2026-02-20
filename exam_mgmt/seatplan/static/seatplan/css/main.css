@@ -292,6 +292,40 @@ tbody tr:last-child td {
     box-shadow: 0 6px 20px rgba(56, 161, 105, 0.4);
 }
 
+.btn-danger {
+    background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+    box-shadow: 0 4px 15px rgba(229, 62, 62, 0.3);
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+    box-shadow: 0 6px 20px rgba(197, 48, 48, 0.4);
+}
+
+.btn-sm {
+    padding: 8px 14px;
+    font-size: 13px;
+    margin-top: 0;
+}
+
+.table-input {
+    width: 90px;
+    margin: 0;
+    padding: 8px 10px;
+    border-radius: 10px;
+}
+
+.table-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.table-actions .btn {
+    margin-top: 0;
+}
+
 /* ---------- Form Elements ---------- */
 input, select, textarea {
     width: 100%;

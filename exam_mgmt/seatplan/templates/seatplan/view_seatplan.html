@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Seat Plan - {{ exam.subject }}</title>
+    <title>Seat Plan - Semester {{ exam.semester }}</title>
     <link rel="stylesheet" href="{% static 'seatplan/css/main.css' %}">
     <link rel="stylesheet" href="{% static 'seatplan/css/seatplan.css' %}">
 </head>
@@ -10,7 +10,7 @@
 <body>
 
 <div class="navbar no-print">
-    <span class="navbar-title">📍 Seat Plan: {{ exam.subject }}</span>
+    <span class="navbar-title">📍 Seat Plan: Semester {{ exam.semester }}</span>
     <div class="navbar-actions">
         <button id="themeToggle" class="theme-toggle-btn"><span class="theme-icon">🌙</span></button>
         <a href="{% url 'seatplan_select' %}" class="back-link">← Back to Selection</a>
@@ -34,9 +34,9 @@
     <!-- Header Info -->
     <div class="plan-header">
         <div class="plan-info">
-            <h2>{{ exam.subject }}</h2>
+            <h2>Semester {{ exam.semester }} Seat Plan</h2>
             <p><strong>Hall:</strong> {{ hall.name }} ({{ hall.rows }} × {{ hall.cols }})</p>
-            <p><strong>Semester:</strong> {{ exam.semester }} | <strong>Date:</strong> {{ exam.date }}</p>
+            <p><strong>Semester:</strong> {{ exam.semester }}</p>
             <p><strong>Total Students:</strong> {{ plans.count }}</p>
         </div>
         <div class="plan-actions no-print">
@@ -71,8 +71,10 @@
 
     <!-- Table View (Alternative) -->
     <div class="table-view">
-        <h3>List View</h3>
+        <h3>List View (by Hall)</h3>
+        {% for group in hall_plan_groups %}
         <div class="table-container">
+            <h4>Hall: {{ group.hall.name }}</h4>
             <table>
                 <thead>
                     <tr>
@@ -83,7 +85,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for p in plans %}
+                    {% for p in group.plans %}
                     <tr>
                         <td><strong>{{ p.seat_number }}</strong></td>
                         <td>{{ p.admitted_student.get_roll_no }}</td>
@@ -98,6 +100,11 @@
                 </tbody>
             </table>
         </div>
+        {% empty %}
+        <div class="table-container">
+            <p style="text-align: center;">No students assigned yet</p>
+        </div>
+        {% endfor %}
     </div>
 </div>
 

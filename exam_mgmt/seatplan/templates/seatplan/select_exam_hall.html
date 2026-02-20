@@ -20,12 +20,12 @@
         {% csrf_token %}
 
         <div class="form-section">
-            <label><b>📚 Select Exam:</b></label>
+            <label><b>📚 Select Semester:</b></label>
             <select name="exam_id" id="examSelect" required>
-                <option value="">-- Choose Exam --</option>
-                {% for exam in exams %}
-                    <option value="{{ exam.id }}" data-candidates="{{ exam.candidates }}" data-semester="{{ exam.semester }}">
-                        {{ exam.subject }} (Semester {{ exam.semester }}) - {{ exam.candidates }} students
+                <option value="">-- Choose Semester --</option>
+                {% for item in semesters %}
+                    <option value="{{ item.exam_id }}" data-candidates="{{ item.students }}" data-semester="{{ item.semester }}">
+                        Semester {{ item.semester }} - {{ item.students }} students
                     </option>
                 {% endfor %}
             </select>
@@ -34,17 +34,20 @@
         <div class="form-section">
             <label><b>🏛️ Select Halls for Seating:</b></label>
             <p class="help-text">Select one or more halls. Students will be distributed randomly.</p>
+            <button type="button" class="btn ghost" id="autoSelectHalls">✨ Auto-select halls</button>
             
             <div class="hall-checkboxes">
                 {% for hall in halls %}
-                <label class="hall-checkbox-label">
-                    <input type="checkbox" name="hall_ids" value="{{ hall.id }}" 
-                           data-capacity="{{ hall.capacity }}">
-                    <span class="hall-info">
-                        <strong>{{ hall.name }}</strong> 
-                        ({{ hall.rows }}×{{ hall.cols }} = {{ hall.capacity }} seats)
-                    </span>
-                </label>
+                <div class="hall-item">
+                    <label class="hall-checkbox-label">
+                        <input type="checkbox" name="hall_ids" value="{{ hall.id }}" 
+                               data-capacity="{{ hall.capacity }}">
+                        <span class="hall-info">
+                            <strong>{{ hall.name }}</strong> 
+                            ({{ hall.rows }}×{{ hall.cols }} = {{ hall.capacity }} seats)
+                        </span>
+                    </label>
+                </div>
                 {% empty %}
                 <p>No halls available. <a href="{% url 'seatplan_create_hall' %}">Create a hall first</a></p>
                 {% endfor %}
@@ -75,6 +78,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const requiredSeatsSpan = document.getElementById('requiredSeats');
     const capacityStatus = document.getElementById('capacityStatus');
     const generateBtn = document.getElementById('generateBtn');
+    const autoSelectBtn = document.getElementById('autoSelectHalls');
 
     function updateCapacity() {
         const selectedExam = examSelect.options[examSelect.selectedIndex];
@@ -105,10 +109,36 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    function autoSelectHalls() {
+        const selectedExam = examSelect.options[examSelect.selectedIndex];
+        const requiredSeats = selectedExam ? parseInt(selectedExam.dataset.candidates) || 0 : 0;
+        if (!requiredSeats) return;
+
+        const halls = Array.from(hallCheckboxes).map(checkbox => ({
+            checkbox,
+            capacity: parseInt(checkbox.dataset.capacity) || 0
+        }));
+
+        halls.sort((a, b) => b.capacity - a.capacity);
+        let capacity = 0;
+        halls.forEach(h => {
+            if (capacity < requiredSeats) {
+                h.checkbox.checked = true;
+                capacity += h.capacity;
+            } else {
+                h.checkbox.checked = false;
+            }
+        });
+
+        updateCapacity();
+    }
+
     examSelect.addEventListener('change', updateCapacity);
     hallCheckboxes.forEach(checkbox => {
         checkbox.addEventListener('change', updateCapacity);
     });
+
+    autoSelectBtn?.addEventListener('click', autoSelectHalls);
 });
 </script>
 </body>

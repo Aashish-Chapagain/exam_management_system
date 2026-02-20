@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_http_methods
 from django import forms
 from .models import Hall, SeatPlan
 from exam_schedule.models import Exam
@@ -30,16 +31,33 @@ def select_exam_hall(request):
     exams = list(Exam.objects.all())
     halls = list(Hall.objects.all())
 
+    exams_by_semester = {}
+    for exam in exams:
+        if exam.semester not in exams_by_semester:
+            exams_by_semester[exam.semester] = exam
+
+    semesters = []
+    for sem in sorted(exams_by_semester.keys()):
+        admitted_count = AdmittedStudent.objects.filter(semester=sem).count()
+        exam = exams_by_semester[sem]
+        # Use admitted student count if available, fallback to exam's candidates field
+        student_count = admitted_count if admitted_count > 0 else exam.candidates
+        semesters.append({
+            'semester': sem,
+            'exam_id': exam.id,
+            'students': student_count,
+        })
+
     # prepare JSON-serializable data for client-side behavior
     exams_json = [
         {
-            'id': e.id,
-            'subject': e.subject,
-            'semester': e.semester,
-            'candidates': e.candidates,
-            'hall_name': e.hall or ''
+            'id': item['exam_id'],
+            'subject': exams_by_semester[item['semester']].subject,
+            'semester': item['semester'],
+            'candidates': item['students'],
+            'hall_name': exams_by_semester[item['semester']].hall or ''
         }
-        for e in exams
+        for item in semesters
     ]
 
     halls_json = [
@@ -54,7 +72,7 @@ def select_exam_hall(request):
     ]
 
     return render(request, 'seatplan/select_exam_hall.html', {
-        'exams': exams,
+        'semesters': semesters,
         'halls': halls,
         'exams_json': exams_json,
         'halls_json': halls_json,
@@ -75,6 +93,39 @@ def create_hall(request):
 
     return render(request, 'seatplan/create_hall.html', {'form': form})
 
+
+@login_required(login_url='admin_login')
+@require_http_methods(["GET", "POST"])
+def manage_halls(request):
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        hall_id = request.POST.get('hall_id')
+        hall = get_object_or_404(Hall, id=hall_id)
+
+        if action == 'delete':
+            hall.delete()
+            return redirect('seatplan_manage_halls')
+
+        if action == 'update':
+            try:
+                rows = int(request.POST.get('rows', hall.rows))
+                cols = int(request.POST.get('cols', hall.cols))
+            except (TypeError, ValueError):
+                rows = hall.rows
+                cols = hall.cols
+
+            rows = max(rows, 1)
+            cols = max(cols, 1)
+            hall.rows = rows
+            hall.cols = cols
+            hall.save()
+            return redirect('seatplan_manage_halls')
+
+    halls = Hall.objects.all().order_by('name')
+    return render(request, 'seatplan/manage_halls.html', {
+        'halls': halls,
+    })
+
 @login_required(login_url='admin_login')
 def generate_seatplan(request, exam_id, hall_ids):
     exam = get_object_or_404(Exam, id=exam_id)
@@ -83,17 +134,8 @@ def generate_seatplan(request, exam_id, hall_ids):
     
     # Get admitted students for this exam's semester
     admitted_students = list(
-        AdmittedStudent.objects.filter(
-            semester=exam.semester,
-            exam=exam.subject
-        ).order_by('?')  # Random order
+        AdmittedStudent.objects.filter(semester=exam.semester).order_by('?')
     )
-    
-    if not admitted_students:
-        # Fallback: get all students for this semester
-        admitted_students = list(
-            AdmittedStudent.objects.filter(semester=exam.semester).order_by('?')
-        )
     
     # Calculate total capacity
     total_capacity = sum(h.capacity for h in halls)
@@ -157,12 +199,31 @@ def view_seatplan(request, exam_id, hall_id):
             }
     
     # Get all halls used for this exam
-    all_halls = Hall.objects.filter(seatplan__exam=exam).distinct()
+    all_halls = Hall.objects.filter(seatplan__exam=exam).distinct().order_by('name')
+
+    all_plans = SeatPlan.objects.filter(exam_id=exam_id).select_related(
+        'admitted_student',
+        'admitted_student__student',
+        'hall'
+    ).order_by('hall__name', 'seat_number')
+
+    plans_by_hall = {}
+    for plan in all_plans:
+        plans_by_hall.setdefault(plan.hall_id, []).append(plan)
+
+    hall_plan_groups = [
+        {
+            'hall': h,
+            'plans': plans_by_hall.get(h.id, [])
+        }
+        for h in all_halls
+    ]
     
     return render(request, "seatplan/view_seatplan.html", {
         "plans": plans,
         "exam": exam,
         "hall": hall,
         "grid": grid,
-        "all_halls": all_halls
+        "all_halls": all_halls,
+        "hall_plan_groups": hall_plan_groups
     })

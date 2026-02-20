@@ -228,15 +228,24 @@ body.dark-mode .roll-number {
     gap: 10px;
 }
 
-.hall-checkbox-label {
+.hall-item {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.hall-checkbox-label {
+    display: flex;
+    align-items: flex-start;
     padding: 12px 16px;
     background: var(--card-bg);
     border: 2px solid var(--border-color);
     border-radius: 10px;
     cursor: pointer;
     transition: all 0.3s ease;
+    flex: 1;
+    gap: 12px;
 }
 
 .hall-checkbox-label:hover {
@@ -247,12 +256,20 @@ body.dark-mode .roll-number {
 .hall-checkbox-label input[type="checkbox"] {
     width: 20px;
     height: 20px;
-    margin-right: 12px;
+    margin-top: 2px;
     cursor: pointer;
+    flex: 0 0 auto;
 }
 
 .hall-info {
     color: var(--text-primary);
+    line-height: 1.4;
+}
+
+.hall-actions {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
 }
 
 /* Capacity Info */
