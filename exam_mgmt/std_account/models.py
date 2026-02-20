@@ -1,6 +1,6 @@
 from django.db import models
 
-# Create your models here.
+
 
 class Student(models.Model):
     SEMESTER_CHOICES = [
@@ -15,19 +15,14 @@ class Student(models.Model):
     ]
     
     DEPARTMENT_CHOICES = [
-        ('CS', 'Computer Science'),
-        ('IT', 'Information Technology'),
-        ('EC', 'Electronics'),
-        ('ME', 'Mechanical'),
-        ('CE', 'Civil'),
-        ('EE', 'Electrical'),
+        ('BCA', 'Bachelor in Computer Application'),
     ]
     
     student_id = models.CharField(max_length=20, unique=True, primary_key=True)
     name = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length=15)
-    department = models.CharField(max_length=2, choices=DEPARTMENT_CHOICES)
+    department = models.CharField(max_length=3, choices=DEPARTMENT_CHOICES)
     semester = models.IntegerField(choices=SEMESTER_CHOICES)
     fees_paid = models.BooleanField(default=False)  # Flag for fees status
     enrollment_year = models.IntegerField()

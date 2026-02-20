@@ -3,33 +3,74 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Admin Login - Exam Management System">
+    <title>Admin Login - Exam Management System</title>
     <link rel="stylesheet" href="{% static 'admin_login/css/style.css' %}">
 </head>
 <body>
-    <h2>
-
-    </h2>
     <div class="login-container">
+        <div class="login-header">
+            <div class="logo">🎓</div>
+            <h2>Admin Login</h2>
+            <p class="subtitle">Exam Management System</p>
+        </div>
 
-        <h2>Admin Login</h2>
         {% if messages %}
-            {% for message in messages %}
-                <div class="{% if message.tags == 'error' %}error-message{% else %}success-message{% endif %}">
-                    <p>{{ message }}</p>
-                </div>
-            {% endfor %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message {% if message.tags == 'error' %}error-message{% else %}success-message{% endif %}">
+                        <span class="message-icon">{% if message.tags == 'error' %}❌{% else %}✓{% endif %}</span>
+                        <span class="message-text">{{ message }}</span>
+                    </div>
+                {% endfor %}
+            </div>
         {% endif %}
 
-
-        <form method="post" autocomplete="off">
+        <form method="post" autocomplete="off" class="login-form">
             {% csrf_token %}
-            <input type="text" name="username" placeholder="Username" required autocomplete="off">
-            <input type="password" name="password" placeholder="Password" required autocomplete="new-password">
-            <button type="submit">Login</button>
+            <div class="input-group">
+                <label for="username" class="sr-only">Username</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">👤</span>
+                    <input 
+                        type="text" 
+                        id="username"
+                        name="username" 
+                        placeholder="Username" 
+                        required 
+                        autocomplete="off"
+                        aria-label="Username"
+                    >
+                </div>
+            </div>
 
+            <div class="input-group">
+                <label for="password" class="sr-only">Password</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">🔒</span>
+                    <input 
+                        type="password" 
+                        id="password"
+                        name="password" 
+                        placeholder="Password" 
+                        required 
+                        autocomplete="new-password"
+                        aria-label="Password"
+                    >
+                </div>
+            </div>
+
+            <button type="submit" class="login-btn">
+                <span>Sign In</span>
+                <span class="btn-arrow">→</span>
+            </button>
         </form>
-        <p class="footer-text">© 2025 Exam Management System</p>
+
+        <div class="login-footer">
+            <p class="footer-text">© 2026 Exam Management System</p>
+            <p class="footer-note">Secure admin portal</p>
+        </div>
     </div>
 
     <script src="{% static 'admin_login/js/script.js' %}"></script>

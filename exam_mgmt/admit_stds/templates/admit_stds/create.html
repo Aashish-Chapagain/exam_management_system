@@ -6,7 +6,13 @@
     <link rel="stylesheet" href="{% static 'seatplan/css/main.css' %}">
 </head>
 <body>
-<div class="navbar">Create Admitted Student</div>
+<div class="navbar">
+    <span class="navbar-title">Create Admitted Student</span>
+    <div class="navbar-actions">
+        <button id="themeToggle" class="theme-toggle-btn"><span class="theme-icon">🌙</span></button>
+        <a href="{% url 'admit_list' %}" class="back-link">← Back to List</a>
+    </div>
+</div>
 <div class="container">
     <form method="post">
         {% csrf_token %}
@@ -15,5 +21,6 @@
         <a class="btn" href="{% url 'admit_list' %}">Cancel</a>
     </form>
 </div>
+<script src="{% static 'seatplan/js/theme.js' %}"></script>
 </body>
 </html>

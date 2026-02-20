@@ -2,48 +2,114 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Select Exam & Hall</title>
+    <title>Select Exam & Halls</title>
     <link rel="stylesheet" href="{% static 'seatplan/css/main.css' %}">
 </head>
 
 <body>
-<div class="navbar">Select Exam & Hall</div>
-
-<div class="container">
-    <form method="POST" onsubmit="return confirmSeatGeneration()">
-        {% csrf_token %}
-
-        <label><b>Select Exam:</b></label><br>
-        <select name="exam_id">
-            {% for exam in exams %}
-                <option value="{{ exam.id }}">{{ exam.subject }} — ({{ exam.semester }})</option>
-            {% endfor %}
-        </select>
-        <br><br>
-
-        <label><b>Select Hall:</b></label><br>
-        <select name="hall_id">
-            {% for hall in halls %}
-                <option value="{{ hall.id }}">{{ hall.name }} ({{ hall.rows }}×{{ hall.cols }})</option>
-            {% endfor %}
-        </select>
-        <br><br>
-
-        <button class="btn">Generate Seat Plan</button>
-    </form>
-    
-    <div id="hall-action" style="margin-top:12px;">
-        <!-- JS will populate a create link here when needed -->
+<div class="navbar">
+    <span class="navbar-title">Select Exam & Halls for Seat Planning</span>
+    <div class="navbar-actions">
+        <button id="themeToggle" class="theme-toggle-btn"><span class="theme-icon">🌙</span></button>
+        <a href="{% url 'seatplan_home' %}" class="back-link">← Back</a>
     </div>
-
-    {# JSON data for client-side logic #}
-    {{ exams_json|json_script:"exams-data" }}
-    {{ halls_json|json_script:"halls-data" }}
-    {% if selected_hall_id %}
-        <input type="hidden" id="selected-hall-id" value="{{ selected_hall_id }}">
-    {% endif %}
 </div>
 
-<script src="{% static 'seatplan/js/main.js' %}"></script>
+<div class="container">
+    <form method="POST" id="seatplanForm">
+        {% csrf_token %}
+
+        <div class="form-section">
+            <label><b>📚 Select Exam:</b></label>
+            <select name="exam_id" id="examSelect" required>
+                <option value="">-- Choose Exam --</option>
+                {% for exam in exams %}
+                    <option value="{{ exam.id }}" data-candidates="{{ exam.candidates }}" data-semester="{{ exam.semester }}">
+                        {{ exam.subject }} (Semester {{ exam.semester }}) - {{ exam.candidates }} students
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-section">
+            <label><b>🏛️ Select Halls for Seating:</b></label>
+            <p class="help-text">Select one or more halls. Students will be distributed randomly.</p>
+            
+            <div class="hall-checkboxes">
+                {% for hall in halls %}
+                <label class="hall-checkbox-label">
+                    <input type="checkbox" name="hall_ids" value="{{ hall.id }}" 
+                           data-capacity="{{ hall.capacity }}">
+                    <span class="hall-info">
+                        <strong>{{ hall.name }}</strong> 
+                        ({{ hall.rows }}×{{ hall.cols }} = {{ hall.capacity }} seats)
+                    </span>
+                </label>
+                {% empty %}
+                <p>No halls available. <a href="{% url 'seatplan_create_hall' %}">Create a hall first</a></p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="capacity-info" id="capacityInfo" style="display:none;">
+            <p><strong>Selected Capacity:</strong> <span id="totalCapacity">0</span> seats</p>
+            <p><strong>Required:</strong> <span id="requiredSeats">0</span> students</p>
+            <p id="capacityStatus"></p>
+        </div>
+
+        <button type="submit" class="btn" id="generateBtn" disabled>🎲 Generate Random Seat Plan</button>
+    </form>
+    
+    <div style="margin-top:20px;">
+        <a href="{% url 'seatplan_create_hall' %}" class="btn ghost">➕ Add New Hall</a>
+    </div>
+</div>
+
+<script src="{% static 'seatplan/js/theme.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const examSelect = document.getElementById('examSelect');
+    const hallCheckboxes = document.querySelectorAll('input[name="hall_ids"]');
+    const capacityInfo = document.getElementById('capacityInfo');
+    const totalCapacitySpan = document.getElementById('totalCapacity');
+    const requiredSeatsSpan = document.getElementById('requiredSeats');
+    const capacityStatus = document.getElementById('capacityStatus');
+    const generateBtn = document.getElementById('generateBtn');
+
+    function updateCapacity() {
+        const selectedExam = examSelect.options[examSelect.selectedIndex];
+        const requiredSeats = selectedExam ? parseInt(selectedExam.dataset.candidates) || 0 : 0;
+        
+        let totalCapacity = 0;
+        hallCheckboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                totalCapacity += parseInt(checkbox.dataset.capacity) || 0;
+            }
+        });
+
+        if (requiredSeats > 0 && totalCapacity > 0) {
+            capacityInfo.style.display = 'block';
+            totalCapacitySpan.textContent = totalCapacity;
+            requiredSeatsSpan.textContent = requiredSeats;
+            
+            if (totalCapacity >= requiredSeats) {
+                capacityStatus.innerHTML = '<span style="color: #48bb78;">✅ Sufficient capacity</span>';
+                generateBtn.disabled = false;
+            } else {
+                capacityStatus.innerHTML = '<span style="color: #f56565;">⚠️ Insufficient capacity - Select more halls</span>';
+                generateBtn.disabled = true;
+            }
+        } else {
+            capacityInfo.style.display = 'none';
+            generateBtn.disabled = true;
+        }
+    }
+
+    examSelect.addEventListener('change', updateCapacity);
+    hallCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateCapacity);
+    });
+});
+</script>
 </body>
 </html>

@@ -4,74 +4,89 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard - Exam Management</title>
+  <meta name="description" content="Exam Management System Dashboard">
+  <title>Dashboard - Exam Management System</title>
   <link rel="stylesheet" href="{% static 'dashboard/css/style.css' %}">
 </head>
 <body>
   
   <header class="navbar">
-    <h1>📚 Exam Management System</h1>
-    <nav>
-      <span style="margin-right: 20px;">Welcome, {{ request.user.username }}</span>
-      <a href="#">Profile</a>
-      <a href="#">Settings</a>
-      <a href="{% url 'logout' %}">Logout</a>
+    <div class="navbar-brand">
+      <h1>📚 Exam Management System</h1>
+    </div>
+    <nav class="navbar-menu">
+      <div class="user-info">
+        <span class="welcome-text">Welcome, <strong>{{ request.user.username }}</strong></span>
+      </div>
+      <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode">
+        <span class="theme-icon">🌙</span>
+      </button>
+      <a href="#" class="nav-link">Profile</a>
+      <a href="#" class="nav-link">Settings</a>
+      <a href="{% url 'logout' %}" class="nav-link logout-btn">Logout</a>
     </nav>
- 
   </header>
-     <div >
-       {% if messages %}
-        {% for message in messages %}
-          {% if message.tags == "success" %}
 
-                <p class=  "success-text" >
-                   {{ message }}
-                </p>
-                {% endif %}
-            {% endfor %}
-        {% endif %}
-</div>
-
+  {% if messages %}
+    <div class="messages-container">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+          <span class="alert-icon">{% if message.tags == 'success' %}✓{% elif message.tags == 'error' %}✗{% else %}ⓘ{% endif %}</span>
+          <span class="alert-message">{{ message }}</span>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
 
   <main class="dashboard">
     
-    <div class="card">
-      <h2>🗂 Exam Scheduling</h2>
-      <p>Create, edit, and manage exam schedules.</p>
-      <a href="{% url 'exam_schedule' %}">schedule Exams</a>
+    <div class="card" data-category="scheduling">
+      <div class="card-icon">🗂</div>
+      <h2>Exam Scheduling</h2>
+      <p>Create, edit, and manage exam schedules with intelligent clash detection.</p>
+      <a href="{% url 'exam_schedule' %}" class="card-btn">Schedule Exams</a>
     </div>
 
-    <div class="card">
-  <h2>📑 Question Bank</h2>
-  <p>Store, organize, and manage question papers.</p>
-  <a href="{% url 'question_bank_home' %}">Go to Question Bank</a>
+    <div class="card" data-category="questions">
+      <div class="card-icon">📑</div>
+      <h2>Question Bank</h2>
+      <p>Store, organize, and manage question papers securely.</p>
+      <a href="{% url 'question_bank_home' %}" class="card-btn">Manage Questions</a>
     </div>
 
-    <div class="card">
-      <h2>🎟 Admit Cards</h2>
-      <p>Generate and distribute student admit cards.</p>
-      <a href="{% url 'admit_list' %}">Manage Admit Cards</a>
+    <div class="card" data-category="admits">
+      <div class="card-icon">🎟</div>
+      <h2>Admit Cards</h2>
+      <p>Generate and distribute student admit cards efficiently.</p>
+      <a href="{% url 'admit_list' %}" class="card-btn">Manage Admits</a>
     </div>
 
-    <div class="card">
-      <h2>📊 Results & Reports</h2>
-      <p>Publish results and generate reports automatically.</p>
-      <a href="#">View Results</a>
+    <div class="card" data-category="results">
+      <div class="card-icon">📊</div>
+      <h2>Results & Reports</h2>
+      <p>Publish results and generate comprehensive reports.</p>
+      <a href="#" class="card-btn">View Results</a>
     </div>
 
-    <div class="card">
-      <h2>🪑 Seat Planning</h2>
+    <div class="card" data-category="seating">
+      <div class="card-icon">🪑</div>
+      <h2>Seat Planning</h2>
       <p>Allocate seats efficiently and reduce manual errors.</p>
-      <a href="{% url 'seatplan_home' %}">Seat Planner</a>
+      <a href="{% url 'seatplan_home' %}" class="card-btn">Plan Seats</a>
     </div>
 
-    <div class="card">
-      <h2>⚙️ Admin Tools</h2>
-      <p>Manage users, update settings, and monitor system activity.</p>
-      <a href="#">Admin Tools</a>
+    <div class="card" data-category="admin">
+      <div class="card-icon">⚙️</div>
+      <h2>Admin Tools</h2>
+      <p>Manage users, settings, and monitor system activity.</p>
+      <a href="#" class="card-btn">Admin Panel</a>
     </div>
   </main>
+
+  <footer class="footer">
+    <p>© 2026 Exam Management System. All rights reserved.</p>
+  </footer>
   
-  <script src =  "{% static 'dashboard/js/script.js' %}"></script>
+  <script src="{% static 'dashboard/js/script.js' %}"></script>
 </body>
 </html>

@@ -5,7 +5,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>School Exam Scheduler</title>
+  <title>Exam Scheduler - Exam Management</title>
 
   <link rel="stylesheet" href="{% static 'exam_schedule/css/style.css' %}" />
 </head>
@@ -21,6 +21,9 @@
           gap rule.</div>
       </div>
       <div class="actions">
+        <button id="themeToggle" class="btn ghost" title="Toggle Dark Mode">
+          <span class="theme-icon">🌙</span>
+        </button>
         <button id="btnValidate" class="btn">Validate</button>
         <button id="btnPrint" class="btn ghost">Print <span class="kbd">Ctrl+P</span></button>
       </div>
@@ -226,6 +229,7 @@
 
   {# Embed initial exams safely using Django's json_script filter #}
   {{ exams_list|json_script:"init-exams" }}
+  <script src="{% static 'exam_schedule/js/theme.js' %}"></script>
   <script src="{% static 'exam_schedule/js/script.js' %}"></script>
 
 </body>

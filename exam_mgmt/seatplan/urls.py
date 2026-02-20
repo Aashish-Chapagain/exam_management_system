@@ -10,6 +10,6 @@ urlpatterns = [
      path('create/', views.create_hall, name='seatplan_create_hall'),
 
      # actions
-     path('generate/<int:exam_id>/<int:hall_id>/', views.generate_seatplan, name="generate_seatplan"),
+     path('generate/<int:exam_id>/<str:hall_ids>/', views.generate_seatplan, name="generate_seatplan"),
      path('view/<int:exam_id>/<int:hall_id>/', views.view_seatplan, name="view_seatplan"),
 ]

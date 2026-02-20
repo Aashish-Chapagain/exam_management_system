@@ -436,8 +436,246 @@ document.addEventListener("DOMContentLoaded", () => {
 
   $("#btnAutoFill")?.addEventListener("click", autoSchedule);
 
+  // Print functionality
+  $("#btnPrint")?.addEventListener("click", function() {
+    printSchedule();
+  });
+
   render();
 });
+
+// Print Schedule - Groups by semester and shows exam details
+function printSchedule() {
+  const rows = Schedule.rows;
+  
+  if (rows.length === 0) {
+    alert("No exams scheduled yet. Please add exams before printing.");
+    return;
+  }
+
+  // Group exams by semester
+  const groupedBySemester = {};
+  rows.forEach(exam => {
+    const sem = exam.semester;
+    if (!groupedBySemester[sem]) {
+      groupedBySemester[sem] = [];
+    }
+    groupedBySemester[sem].push(exam);
+  });
+
+  // Sort by semester
+  const semesterKeys = Object.keys(groupedBySemester).map(Number).sort((a, b) => a - b);
+
+  // Create print window
+  const printWindow = window.open('', '', 'width=800,height=600');
+  const schoolName = $("#schoolName")?.value || "Exam Management System";
+  const term = $("#term")?.value || "Regular Term";
+
+  let printContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>Exam Schedule</title>
+      <style>
+        body {
+          font-family: 'Arial', sans-serif;
+          margin: 30px;
+          color: #333;
+        }
+        .header {
+          text-align: center;
+          margin-bottom: 30px;
+          border-bottom: 3px solid #667eea;
+          padding-bottom: 15px;
+        }
+        .header h1 {
+          margin: 0;
+          color: #667eea;
+          font-size: 28px;
+        }
+        .header p {
+          margin: 5px 0;
+          font-size: 14px;
+          color: #666;
+        }
+        .semester-section {
+          page-break-inside: avoid;
+          margin-bottom: 40px;
+          border: 2px solid #667eea;
+          border-radius: 8px;
+          padding: 15px;
+          background-color: #f9f9f9;
+        }
+        .semester-title {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          padding: 12px 15px;
+          margin: -15px -15px 15px -15px;
+          border-radius: 6px 6px 0 0;
+          font-size: 18px;
+          font-weight: bold;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 10px;
+        }
+        th {
+          background-color: #e8eaf6;
+          border: 1px solid #667eea;
+          padding: 10px;
+          text-align: left;
+          font-weight: bold;
+          color: #667eea;
+        }
+        td {
+          border: 1px solid #ddd;
+          padding: 10px;
+          font-size: 13px;
+        }
+        tr:nth-child(even) {
+          background-color: #f5f5f5;
+        }
+        tr:hover {
+          background-color: #fff9e6;
+        }
+        .no-exams {
+          color: #999;
+          font-size: 13px;
+          padding: 10px;
+          text-align: center;
+        }
+        .footer {
+          text-align: center;
+          margin-top: 40px;
+          padding-top: 20px;
+          border-top: 2px solid #ddd;
+          font-size: 12px;
+          color: #666;
+        }
+        @media print {
+          body {
+            margin: 0;
+            padding: 10px;
+          }
+          .semester-section {
+            page-break-inside: avoid;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>📚 Exam Schedule</h1>
+        <p><strong>${schoolName}</strong></p>
+        <p>${term}</p>
+        <p>Generated on: ${new Date().toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        })}</p>
+      </div>
+  `;
+
+  // Add semester-wise sections
+  semesterKeys.forEach(semester => {
+    const exams = groupedBySemester[semester];
+    const sortedExams = exams.sort((a, b) => {
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      return dateA - dateB;
+    });
+
+    printContent += `
+      <div class="semester-section">
+        <div class="semester-title">Semester ${semester}</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Start Time</th>
+              <th>End Time</th>
+              <th>Subject</th>
+              <th>Paper Code</th>
+              <th>Hall</th>
+              <th>Duration</th>
+              <th>Candidates</th>
+            </tr>
+          </thead>
+          <tbody>
+    `;
+
+    if (sortedExams.length === 0) {
+      printContent += `<tr><td colspan="8" class="no-exams">No exams scheduled</td></tr>`;
+    } else {
+      sortedExams.forEach(exam => {
+        const dateObj = new Date(exam.date);
+        const formattedDate = dateObj.toLocaleDateString('en-US', { 
+          weekday: 'short',
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        });
+        
+        const startTime = exam.start || exam.start_time || '-';
+        const endTime = calculateEndTime(startTime, exam.duration);
+        
+        printContent += `
+          <tr>
+            <td>${formattedDate}</td>
+            <td>${startTime}</td>
+            <td>${endTime}</td>
+            <td>${exam.subject || '-'}</td>
+            <td>${exam.paper_code || '-'}</td>
+            <td>${exam.hall || '-'}</td>
+            <td>${exam.duration} min</td>
+            <td>${exam.candidates || 0}</td>
+          </tr>
+        `;
+      });
+    }
+
+    printContent += `
+          </tbody>
+        </table>
+      </div>
+    `;
+  });
+
+  printContent += `
+      <div class="footer">
+        <p>This is an official exam schedule. Please verify all details carefully.</p>
+        <p>&copy; ${new Date().getFullYear()} Exam Management System</p>
+      </div>
+    </body>
+    </html>
+  `;
+
+  printWindow.document.write(printContent);
+  printWindow.document.close();
+  
+  // Auto-trigger print dialog
+  setTimeout(() => {
+    printWindow.print();
+  }, 250);
+}
+
+// Helper function to calculate end time
+function calculateEndTime(startTime, durationMinutes) {
+  if (!startTime || !durationMinutes) return '-';
+  try {
+    const [hours, minutes] = startTime.split(':').map(Number);
+    const totalMinutes = hours * 60 + minutes + durationMinutes;
+    const endHours = Math.floor(totalMinutes / 60) % 24;
+    const endMinutes = totalMinutes % 60;
+    return `${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}`;
+  } catch {
+    return '-';
+  }
+}
 
 // Filters
 const filterClass = $("#filterClass");

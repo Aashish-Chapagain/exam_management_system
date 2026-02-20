@@ -14,7 +14,7 @@ class AdmittedStudentForm(forms.ModelForm):
     
     class Meta:
         model = AdmittedStudent
-        fields = ['student', 'exam', 'exam_date']
+        fields = ['student','semester', 'exam', 'exam_date']
 
 
 @login_required(login_url='admin_login')

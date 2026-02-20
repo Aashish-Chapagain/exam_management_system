@@ -2,44 +2,106 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Seat Plan</title>
+    <title>Seat Plan - {{ exam.subject }}</title>
     <link rel="stylesheet" href="{% static 'seatplan/css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'seatplan/css/seatplan.css' %}">
 </head>
 
 <body>
 
-<div class="navbar no-print">Seat Plan for {{ exam.subject }}</div>
-
-<div class="container">
-
-    <h2>{{ exam.subject }} — {{ hall.name }}</h2>
-
-    <div class="table-container">
-        <table>
-            <tr>
-                <th>Seat No</th>
-                <th>Roll No</th>
-                <th>Name</th>
-                <th>Row</th>
-                <th>Column</th>
-            </tr>
-
-            {% for p in plans %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>{{ p.student.roll_no }}</td>
-                <td>{{ p.student.name }}</td>
-                <td>{{ p.row }}</td>
-                <td>{{ p.column }}</td>
-            </tr>
-            {% endfor %}
-        </table>
+<div class="navbar no-print">
+    <span class="navbar-title">📍 Seat Plan: {{ exam.subject }}</span>
+    <div class="navbar-actions">
+        <button id="themeToggle" class="theme-toggle-btn"><span class="theme-icon">🌙</span></button>
+        <a href="{% url 'seatplan_select' %}" class="back-link">← Back to Selection</a>
     </div>
-
-    <br>
-    <button class="btn no-print" onclick="printSeatPlan()">Print Seat Plan</button>
 </div>
 
+<div class="container">
+    <!-- Hall Selector -->
+    {% if all_halls.count > 1 %}
+    <div class="hall-selector no-print">
+        <label>Switch Hall:</label>
+        {% for h in all_halls %}
+            <a href="{% url 'view_seatplan' exam.id h.id %}" 
+               class="hall-btn {% if h.id == hall.id %}active{% endif %}">
+                {{ h.name }}
+            </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Header Info -->
+    <div class="plan-header">
+        <div class="plan-info">
+            <h2>{{ exam.subject }}</h2>
+            <p><strong>Hall:</strong> {{ hall.name }} ({{ hall.rows }} × {{ hall.cols }})</p>
+            <p><strong>Semester:</strong> {{ exam.semester }} | <strong>Date:</strong> {{ exam.date }}</p>
+            <p><strong>Total Students:</strong> {{ plans.count }}</p>
+        </div>
+        <div class="plan-actions no-print">
+            <button class="btn" onclick="window.print()">🖨️ Print Seat Plan</button>
+        </div>
+    </div>
+
+    <!-- Graphical Seat Layout -->
+    <div class="seat-layout-container">
+        <h3>Seating Arrangement (Front of Hall ↓)</h3>
+        
+        <div class="board-indicator">
+            📋 BOARD / FRONT
+        </div>
+
+        <div class="seat-grid" style="grid-template-columns: repeat({{ hall.cols }}, 1fr);">
+            {% for row in grid %}
+                {% for seat in row %}
+                    <div class="seat-box {% if seat %}occupied{% else %}empty{% endif %}">
+                        {% if seat %}
+                            <div class="seat-number">{{ seat.seat_number }}</div>
+                            <div class="roll-number">{{ seat.roll_no }}</div>
+                            <div class="student-name">{{ seat.name|truncatewords:2 }}</div>
+                        {% else %}
+                            <div class="empty-marker">—</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Table View (Alternative) -->
+    <div class="table-view">
+        <h3>List View</h3>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Seat #</th>
+                        <th>Roll No</th>
+                        <th>Name</th>
+                        <th>Position</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in plans %}
+                    <tr>
+                        <td><strong>{{ p.seat_number }}</strong></td>
+                        <td>{{ p.admitted_student.get_roll_no }}</td>
+                        <td>{{ p.admitted_student.get_name }}</td>
+                        <td>Row {{ p.row }}, Col {{ p.column }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" style="text-align: center;">No students assigned yet</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'seatplan/js/theme.js' %}"></script>
 <script src="{% static 'seatplan/js/main.js' %}"></script>
 </body>
 </html>

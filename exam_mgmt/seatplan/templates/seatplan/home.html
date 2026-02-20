@@ -1,45 +1,64 @@
 {% load static %}
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Seat Plan Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Exam Seat Planning System">
+    <title>Seat Plan Dashboard - Exam Management</title>
     <link rel="stylesheet" href="{% static 'seatplan/css/main.css' %}">
 </head>
-
 <body>
-    <div class="navbar">Exam Seat Planning System</div>
+    <div class="navbar">
+        <span class="navbar-title">🪑 Exam Seat Planning System</span>
+        <div class="navbar-actions">
+            <button id="themeToggle" class="theme-toggle-btn"><span class="theme-icon">🌙</span></button>
+            <a href="{% url 'dashboard_home' %}" class="back-link">← Back to Dashboard</a>
+        </div>
+    </div>
 
     <div class="container">
-        <div class="card-grid">
+        <div class="page-header">
+            <h1>Seat Planning Dashboard</h1>
+            <p class="page-description">Efficiently manage exam halls and generate optimized seat plans</p>
+        </div>
 
+        <div class="card-grid">
             <!-- Create Hall -->
             <div class="card">
+                <div class="card-icon">🏛️</div>
                 <h3>Create Hall</h3>
-                 <a href="{% url 'seatplan_create_hall' %}">Add Hall</a>
+                <p class="card-description">Add new examination halls with capacity details</p>
+                <a href="{% url 'seatplan_create_hall' %}">Add New Hall</a>
             </div>
 
             <!-- Create Exam -->
             <div class="card">
+                <div class="card-icon">📝</div>
                 <h3>Create Exam</h3>
-                 <a href="{% url 'exam_schedule' %}">Add Exam</a>
+                <p class="card-description">Schedule new examinations and set parameters</p>
+                <a href="{% url 'exam_schedule' %}">Schedule Exam</a>
             </div>
 
             <!-- Generate Seat Plan -->
             <div class="card">
+                <div class="card-icon">⚡</div>
                 <h3>Generate Seat Plan</h3>
-                 <a href="{% url 'seatplan_select' %}">Generate</a>
+                <p class="card-description">Auto-generate seat arrangements for exams</p>
+                <a href="{% url 'seatplan_select' %}">Generate Plan</a>
             </div>
 
-         
+            <!-- View Seat Plans -->
             <div class="card">
+                <div class="card-icon">👁️</div>
                 <h3>View Seat Plans</h3>
-                 <a href="{% url 'seatplan_select' %}">View Plans</a>
+                <p class="card-description">Review and print existing seat arrangements</p>
+                <a href="{% url 'seatplan_select' %}">View Plans</a>
             </div>
-
         </div>
     </div>
 
-<script src="{% static 'seatplan/js/main.js' %}"></script>
+    <script src="{% static 'seatplan/js/theme.js' %}"></script>
+    <script src="{% static 'seatplan/js/main.js' %}"></script>
 </body>
 </html>

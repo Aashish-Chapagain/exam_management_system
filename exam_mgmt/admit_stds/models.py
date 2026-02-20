@@ -12,7 +12,7 @@ class AdmittedStudent(models.Model):
     exam = models.CharField(max_length=200)
     exam_date = models.DateField(null=True, blank=True)
     admitted_at = models.DateTimeField(auto_now_add=True)
-
+    semester = models.IntegerField(null = False, blank = False)
     class Meta:
         ordering = ['-admitted_at']
 
@@ -26,3 +26,4 @@ class AdmittedStudent(models.Model):
     
     def get_roll_no(self):
         return self.student.student_id if self.student else self.roll_no
+    

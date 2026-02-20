@@ -145,4 +145,5 @@ STATICFILES_DIRS = [
     # Add per-app static directories if using collectstatic during dev builds.
     # Example: BASE_DIR / 'exam_mgmt' / 'static'
 ]
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+# Only use ManifestStaticFilesStorage in production, not in development
+# STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
