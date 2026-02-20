@@ -150,7 +150,7 @@ function render() {
       <td>${r.hall || "-"}</td>
       <td>${r.invigilators || "-"}</td>
       <td>${r.duration}</td>
-      <td>${r.candidates || 0}</td>
+      <td>${r.candidates || 35}</td>
       <td>
         <button data-e="${r.id}">Edit</button>
         <button data-d="${r.id}">Delete</button>
@@ -177,7 +177,7 @@ function readForm() {
     start_time: $("#start").value,
     duration: Number($("#duration").value || $("#defaultDuration").value || 90),
     hall: $("#hall").value,
-    candidates: Number($("#candidates").value || 0),
+    candidates: Number($("#candidates").value || 35),
     invigilators: $("#invigilators").value,
     notes: $("#notes").value,
   };
@@ -228,6 +228,7 @@ function autoSchedule() {
   const windowEnd = $("#windowEnd")?.value;
   const minGap = parseInt($("#minGap")?.value ?? "1", 10);
   const duration = parseInt($("#defaultDuration")?.value ?? "90", 10);
+  const expectedCandidates = parseInt($("#defaultCandidates")?.value ?? "35", 10);
   const startTime = "09:00";
   const term = $("#term")?.value || "";
   const course = "BCA";
@@ -332,7 +333,7 @@ function autoSchedule() {
         start_time: startTime,
         duration,
         hall: "",
-        candidates: 0,
+        candidates: expectedCandidates,
         invigilators,
         notes: "",
       };

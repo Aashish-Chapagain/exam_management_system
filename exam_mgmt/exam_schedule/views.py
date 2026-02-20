@@ -95,7 +95,7 @@ def auto_fill(request):
                     'start_time': start_time,
                     'duration': duration,
                     'hall': '',
-                    'candidates': 0,
+                    'candidates': 35,
                     'invigilators': invigilators,
                     'notes': '',
                 }

@@ -52,7 +52,7 @@
             📋 BOARD / FRONT
         </div>
 
-        <div class="seat-grid" style="grid-template-columns: repeat({{ hall.cols }}, 1fr);">
+        <div class="seat-grid" style="--cols: {{ hall.cols }};">
             {% for row in grid %}
                 {% for seat in row %}
                     <div class="seat-box {% if seat %}occupied{% else %}empty{% endif %}">
